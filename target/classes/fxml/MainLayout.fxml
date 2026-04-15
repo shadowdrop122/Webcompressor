@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="compressor.gui.MainController"
+            prefHeight="800" prefWidth="1200">
+
+    <top>
+        <VBox spacing="0">
+            <MenuBar>
+                <Menu text="文件">
+                    <MenuItem text="选择文件" onAction="#handleSelectFiles" accelerator="Shortcut+O"/>
+                    <MenuItem text="选择文件夹" onAction="#handleSelectDirectory" accelerator="Shortcut+D"/>
+                    <SeparatorMenuItem/>
+                    <MenuItem text="退出" onAction="#handleExit" accelerator="Shortcut+Q"/>
+                </Menu>
+                <Menu text="压缩">
+                    <MenuItem text="开始压缩" onAction="#handleStartCompression" accelerator="Shortcut+Enter"/>
+                    <MenuItem text="清空列表" onAction="#handleClearList"/>
+                </Menu>
+                <Menu text="帮助">
+                    <MenuItem text="关于" onAction="#handleAbout"/>
+                </Menu>
+            </MenuBar>
+            <ToolBar>
+                <Button text="选择文件" onAction="#handleSelectFiles" graphicTextGap="5"/>
+                <Button text="选择文件夹" onAction="#handleSelectDirectory" graphicTextGap="5"/>
+                <Separator orientation="VERTICAL"/>
+                <Label text="算法:"/>
+                <ComboBox fx:id="algorithmComboBox" prefWidth="180"/>
+                <Separator orientation="VERTICAL"/>
+                <Button text="开始压缩" onAction="#handleStartCompression" styleClass="primary-button"/>
+                <Button text="停止" onAction="#handleStopCompression" styleClass="danger-button"/>
+            </ToolBar>
+        </VBox>
+    </top>
+
+    <center>
+        <SplitPane dividerPositions="0.25, 0.55, 0.8">
+            <VBox spacing="5" styleClass="panel">
+                <padding>
+                    <Insets top="10" right="10" bottom="10" left="10"/>
+                </padding>
+                <Label text="文件列表" styleClass="panel-title"/>
+                <TableView fx:id="fileTable" prefHeight="400">
+                    <columns>
+                        <TableColumn text="文件名" prefWidth="150">
+                            <cellValueFactory>
+                                <PropertyValueFactory property="fileName"/>
+                            </cellValueFactory>
+                        </TableColumn>
+                        <TableColumn text="大小" prefWidth="80">
+                            <cellValueFactory>
+                                <PropertyValueFactory property="fileSize"/>
+                            </cellValueFactory>
+                        </TableColumn>
+                        <TableColumn text="类型" prefWidth="50">
+                            <cellValueFactory>
+                                <PropertyValueFactory property="fileType"/>
+                            </cellValueFactory>
+                        </TableColumn>
+                    </columns>
+                </TableView>
+                <HBox spacing="5" alignment="CENTER_LEFT">
+                    <Button text="移除选中" onAction="#handleRemoveSelected" prefWidth="100"/>
+                    <Button text="清空全部" onAction="#handleClearList" prefWidth="100"/>
+                </HBox>
+                <Label text="选中文件统计:" styleClass="panel-subtitle"/>
+                <Label fx:id="selectedFilesCount" text="0 个文件"/>
+                <Label fx:id="selectedTotalSize" text="0 B"/>
+            </VBox>
+
+            <VBox spacing="5" styleClass="panel">
+                <padding>
+                    <Insets top="10" right="10" bottom="10" left="10"/>
+                </padding>
+                <Label text="控制台输出" styleClass="panel-title"/>
+                <TextArea fx:id="consoleOutput" editable="false" wrapText="true"
+                          VBox.vgrow="ALWAYS" prefRowCount="20"/>
+                <ProgressBar fx:id="progressBar" visible="false"/>
+                <Label fx:id="progressLabel" visible="false"/>
+            </VBox>
+
+            <VBox spacing="10" styleClass="panel">
+                <padding>
+                    <Insets top="10" right="10" bottom="10" left="10"/>
+                </padding>
+                <Label text="可视化分析" styleClass="panel-title"/>
+
+                <TabPane>
+                    <Tab text="压缩对比">
+                        <VBox spacing="10">
+                            <padding>
+                                <Insets top="10" right="10" bottom="10" left="10"/>
+                            </padding>
+                            <BarChart fx:id="compressionChart" prefHeight="250"
+                                      legendVisible="true" barGap="2">
+                                <xAxis>
+                                    <CategoryAxis label="文件"/>
+                                </xAxis>
+                                <yAxis>
+                                    <NumberAxis label="大小 (bytes)"/>
+                                </yAxis>
+                            </BarChart>
+                            <HBox spacing="10" alignment="CENTER">
+                                <Label text="原始总大小:"/>
+                                <Label fx:id="chartOriginalSize" text="0 B" styleClass="label-bold"/>
+                                <Separator orientation="VERTICAL"/>
+                                <Label text="压缩后:"/>
+                                <Label fx:id="chartCompressedSize" text="0 B" styleClass="label-bold"/>
+                                <Separator orientation="VERTICAL"/>
+                                <Label text="节省:"/>
+                                <Label fx:id="chartSavings" text="0%" styleClass="label-success"/>
+                            </HBox>
+                        </VBox>
+                    </Tab>
+                    <Tab text="树结构">
+                        <VBox spacing="10">
+                            <padding>
+                                <Insets top="10" right="10" bottom="10" left="10"/>
+                            </padding>
+                            <HBox spacing="10" alignment="CENTER_LEFT">
+                                <Label text="显示深度:"/>
+                                <Spinner fx:id="treeDepthSpinner" min="2" max="10" initialValue="4" prefWidth="80"/>
+                                <Button text="刷新" onAction="#handleRefreshTree"/>
+                            </HBox>
+                            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS">
+                                <TextArea fx:id="treeVisualization" editable="false" wrapText="false">
+                                    <font>
+                                        <Font name="Courier New" size="12"/>
+                                    </font>
+                                </TextArea>
+                            </ScrollPane>
+                        </VBox>
+                    </Tab>
+                    <Tab text="传输分析">
+                        <VBox spacing="10">
+                            <padding>
+                                <Insets top="10" right="10" bottom="10" left="10"/>
+                            </padding>
+                            <HBox spacing="10" alignment="CENTER_LEFT">
+                                <Label text="网络环境:"/>
+                                <ComboBox fx:id="bandwidthComboBox" prefWidth="180"/>
+                            </HBox>
+                            <TextArea fx:id="transferReport" editable="false" wrapText="true"
+                                      VBox.vgrow="ALWAYS">
+                                <font>
+                                    <Font name="Courier New" size="11"/>
+                                </font>
+                            </TextArea>
+                        </VBox>
+                    </Tab>
+                </TabPane>
+            </VBox>
+        </SplitPane>
+    </center>
+
+    <bottom>
+        <HBox spacing="20" styleClass="status-bar">
+            <padding>
+                <Insets top="5" right="10" bottom="5" left="10"/>
+            </padding>
+            <Label fx:id="statusLabel" text="就绪"/>
+            <Separator orientation="VERTICAL"/>
+            <Label text="算法:"/>
+            <Label fx:id="currentAlgorithm" text="Huffman"/>
+            <Separator orientation="VERTICAL"/>
+            <Label fx:id="memoryUsage" text="内存: 0 MB"/>
+        </HBox>
+    </bottom>
+
+</BorderPane>
