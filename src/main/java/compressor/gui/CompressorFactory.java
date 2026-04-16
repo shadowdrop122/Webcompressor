@@ -9,7 +9,9 @@ public class CompressorFactory {
     public enum CompressorType {
         HUFFMAN("Huffman", "哈夫曼编码 - 基于字符频率的变长编码压缩算法"),
         LZ77("LZ77", "LZ77滑动窗口字典压缩 - 基于重复模式的字典编码"),
-        WEB_DICT("WebDict", "网页专用压缩 - Trie树字典 + LZ77 + Huffman 三级混合压缩");
+        WEB_DICT("WebDict", "网页专用压缩 - Trie树字典 + LZ77 + Huffman 三级混合压缩"),
+        LZW_IMAGE("LZWImage", "LZW图像压缩 - 基于ZLIB的图像无损像素压缩"),
+        POOLING_IMAGE("PoolingImage", "池化降质压缩 - 均值池化+有损压缩，支持质量参数1-10");
 
         private final String name;
         private final String description;
@@ -42,6 +44,8 @@ public class CompressorFactory {
             case HUFFMAN -> new HuffmanCompressor();
             case LZ77 -> new LZ77Compressor();
             case WEB_DICT -> new WebDictCompressor();
+            case LZW_IMAGE -> new LZWImageCompressor();
+            case POOLING_IMAGE -> new PoolingImageCompressor();
         };
     }
 
@@ -57,6 +61,7 @@ public class CompressorFactory {
         String ext = extension.toLowerCase();
         return switch (ext) {
             case "html", "htm", "css", "js", "json", "xml" -> CompressorType.WEB_DICT;
+            case "jpg", "jpeg", "png", "gif", "webp", "bmp" -> CompressorType.POOLING_IMAGE;
             case "txt", "log", "csv", "md" -> CompressorType.HUFFMAN;
             default -> CompressorType.HUFFMAN;
         };
