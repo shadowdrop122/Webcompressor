@@ -1,0 +1,4 @@
+compressor\algorithms\ImageCompressorTest.class
+compressor\algorithms\WebDictCompressorTest.class
+compressor\model\IncrementalCompressorTest.class
+compressor\algorithms\HuffmanCompressorTest.class

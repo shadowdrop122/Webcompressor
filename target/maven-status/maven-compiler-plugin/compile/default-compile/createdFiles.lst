@@ -12,6 +12,7 @@ compressor\utils\TransferSimulator$TransferEstimate.class
 compressor\algorithms\WebDictCompressor.class
 compressor\algorithms\LZ77Compressor$Match.class
 compressor\algorithms\IncrementalCompressor.class
+compressor\algorithms\PoolingImageCompressor.class
 compressor\gui\ChartBuilder$NodeBuilder.class
 compressor\gui\CompressorFactory.class
 compressor\gui\CompressionService$1.class
@@ -37,6 +38,7 @@ compressor\utils\TransferSimulator$BandwidthProfile.class
 compressor\algorithms\TrieDictionary.class
 compressor\gui\CompressionService$CompressionResult$ErrorResult.class
 compressor\algorithms\HuffmanCompressor.class
+compressor\algorithms\LZWImageCompressor.class
 compressor\gui\ChartBuilder.class
 compressor\model\CompressionStats.class
 compressor\algorithms\HuffmanNode.class
