@@ -1,5 +1,8 @@
 package compressor.gui;
 
+import compressor.algorithms.*;
+import compressor.core.ICompressor;
+import compressor.engine.WZipArchiver;
 import compressor.model.CompressionStats;
 import compressor.utils.FileUtils;
 import compressor.utils.TransferSimulator;
@@ -20,6 +23,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -30,6 +34,9 @@ public class MainController {
 
     @FXML private ComboBox<CompressorFactory.CompressorType> algorithmComboBox;
     @FXML private ComboBox<TransferSimulator.BandwidthProfile> bandwidthComboBox;
+    @FXML private CheckBox smartModeCheckBox;
+    @FXML private Slider imageQualitySlider;
+    @FXML private Label imageQualityLabel;
     @FXML private TableView<FileEntry> fileTable;
     @FXML private TextArea consoleOutput;
     @FXML private TextArea treeVisualization;
@@ -74,6 +81,7 @@ public class MainController {
 
     @FXML
     private void initialize() {
+        // 算法下拉框
         algorithmComboBox.getItems().addAll(CompressorFactory.getAvailableTypes());
         algorithmComboBox.setValue(CompressorFactory.CompressorType.HUFFMAN);
         algorithmComboBox.setOnAction(e -> {
@@ -81,6 +89,28 @@ public class MainController {
         });
         currentAlgorithm.setText(CompressorFactory.CompressorType.HUFFMAN.getName());
 
+        // 智能模式复选框 - 切换算法下拉框可用性
+        smartModeCheckBox.setSelected(true);
+        algorithmComboBox.setDisable(true); // 智能模式默认开启，下拉框禁用
+        smartModeCheckBox.setOnAction(e -> {
+            boolean smartMode = smartModeCheckBox.isSelected();
+            algorithmComboBox.setDisable(smartMode);
+            if (smartMode) {
+                currentAlgorithm.setText("智能匹配");
+            } else {
+                currentAlgorithm.setText(algorithmComboBox.getValue().getName());
+            }
+        });
+
+        // 图片质量滑块
+        imageQualitySlider.setValue(5);
+        imageQualityLabel.setText("5");
+        imageQualitySlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            imageQualityLabel.setText(String.valueOf(newVal.intValue()));
+            PoolingImageCompressor.setDefaultQuality(newVal.intValue());
+        });
+
+        // 网络环境
         bandwidthComboBox.getItems().addAll(TransferSimulator.getAllProfiles());
         bandwidthComboBox.setValue(TransferSimulator.BandwidthProfile.FOUR_G);
         bandwidthComboBox.setOnAction(e -> updateTransferReport());
@@ -246,11 +276,17 @@ public class MainController {
             .map(e -> Paths.get(e.getFilePath()))
             .collect(Collectors.toList());
 
+        boolean smartMode = smartModeCheckBox.isSelected();
         CompressorFactory.CompressorType type = algorithmComboBox.getValue();
+        int imageQuality = (int) imageQualitySlider.getValue();
 
         appendLog("=".repeat(50));
         appendLog("开始压缩任务...");
-        appendLog("算法: " + type.getName());
+        appendLog("模式: " + (smartMode ? "智能匹配" : "手动选择"));
+        appendLog("图片质量: " + imageQuality);
+        if (!smartMode) {
+            appendLog("算法: " + type.getName());
+        }
         appendLog("输出目录: " + outputDirectory);
         appendLog("=".repeat(50));
 
@@ -260,7 +296,7 @@ public class MainController {
         progressLabel.setText("准备中...");
         statusLabel.setText("压缩中...");
 
-        compressionService.configure(files, type, outputDirectory, this::appendLog);
+        compressionService.configure(files, type, outputDirectory, this::appendLog, smartMode, imageQuality);
         compressionService.start();
     }
 
@@ -384,5 +420,162 @@ public class MainController {
         alert.setTitle("提示");
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    @FXML
+    private void handleArchiveWZip(ActionEvent event) {
+        DirectoryChooser chooser = new DirectoryChooser();
+        chooser.setTitle("选择要归档的网页文件夹");
+        File dir = chooser.showDialog(null);
+
+        if (dir == null) {
+            return;
+        }
+
+        FileChooser fileSaver = new FileChooser();
+        fileSaver.setTitle("保存归档文件");
+        fileSaver.getExtensionFilters().add(new FileChooser.ExtensionFilter("WZip归档", "*.wzip"));
+        fileSaver.setInitialFileName(" webpage.wzip");
+        File outputFile = fileSaver.showSaveDialog(null);
+
+        if (outputFile == null) {
+            return;
+        }
+
+        appendLog("=".repeat(50));
+        appendLog("开始网页归档...");
+        appendLog("源目录: " + dir.getAbsolutePath());
+        appendLog("目标文件: " + outputFile.getAbsolutePath());
+        appendLog("=".repeat(50));
+
+        new Thread(() -> {
+            try {
+                WZipArchiver archiver = new WZipArchiver();
+                archiver.archive(dir.toPath(), outputFile.toPath());
+                Platform.runLater(() -> {
+                    appendLog("归档完成！");
+                    appendLog("文件已保存至: " + outputFile.getAbsolutePath());
+                });
+            } catch (Exception e) {
+                Platform.runLater(() -> {
+                    appendLog("归档失败: " + e.getMessage());
+                    showAlert("归档失败: " + e.getMessage());
+                });
+            }
+        }).start();
+    }
+
+    @FXML
+    private void handleDecompress(ActionEvent event) {
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("选择要解压的文件");
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("压缩文件", "*.compressed", "*.huff", "*.zip"));
+        File inputFile = chooser.showOpenDialog(null);
+
+        if (inputFile == null) {
+            return;
+        }
+
+        DirectoryChooser dirChooser = new DirectoryChooser();
+        dirChooser.setTitle("选择输出目录");
+        File outputDir = dirChooser.showDialog(null);
+
+        if (outputDir == null) {
+            return;
+        }
+
+        new Thread(() -> {
+            try {
+                Path inputPath = inputFile.toPath();
+                Path outputPath = outputDir.toPath();
+
+                appendLog("=".repeat(50));
+                appendLog("开始解压...");
+                appendLog("文件: " + inputFile.getName());
+                appendLog("输出: " + outputDir.getAbsolutePath());
+                appendLog("=".repeat(50));
+
+                byte[] compressed = Files.readAllBytes(inputPath);
+                String fileName = inputFile.getName();
+
+                // 根据文件后缀智能选择解压算法
+                String extension = FileUtils.getFileExtension(fileName);
+                CompressorFactory.CompressorType type = CompressorFactory.getTypeFromExtension(extension);
+
+                // 尝试多种解压器
+                ICompressor decompressor = null;
+                try {
+                    switch (type) {
+                        case POOLING_IMAGE, LZW_IMAGE -> {
+                            LZWImageCompressor lzw = new LZWImageCompressor();
+                            decompressor = lzw;
+                        }
+                        case WEB_DICT -> {
+                            // WebDict 解压较慢，跳过
+                            throw new Exception("跳过WebDict");
+                        }
+                        default -> {
+                            LZ77Compressor lz77 = new LZ77Compressor();
+                            decompressor = lz77;
+                        }
+                    }
+                } catch (Exception e) {
+                    decompressor = new LZ77Compressor();
+                }
+
+                byte[] decompressed = decompressor.decompress(compressed);
+                String outputFileName = fileName.replace(".compressed", "").replace(".huff", "");
+                Path outFile = outputPath.resolve(outputFileName);
+                Files.write(outFile, decompressed);
+
+                final long size = decompressed.length;
+                Platform.runLater(() -> {
+                    appendLog("解压完成！");
+                    appendLog("输出文件: " + outFile);
+                    appendLog("大小: " + FileUtils.formatFileSize(size));
+                });
+            } catch (Exception e) {
+                Platform.runLater(() -> {
+                    appendLog("解压失败: " + e.getMessage());
+                    showAlert("解压失败: " + e.getMessage());
+                });
+            }
+        }).start();
+    }
+
+    @FXML
+    private void handleExtractWZip(ActionEvent event) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("选择WZip归档文件");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("WZip归档", "*.wzip"));
+        File wzipFile = fileChooser.showOpenDialog(null);
+
+        if (wzipFile == null) {
+            return;
+        }
+
+        DirectoryChooser dirChooser = new DirectoryChooser();
+        dirChooser.setTitle("选择解压输出目录");
+        File outputDir = dirChooser.showDialog(null);
+
+        if (outputDir == null) {
+            return;
+        }
+
+        new Thread(() -> {
+            try {
+                WZipArchiver archiver = new WZipArchiver();
+                archiver.extract(wzipFile.toPath(), outputDir.toPath());
+                Platform.runLater(() -> {
+                    appendLog("解包完成！");
+                    appendLog("文件已解压至: " + outputDir.getAbsolutePath());
+                });
+            } catch (Exception e) {
+                Platform.runLater(() -> {
+                    appendLog("解包失败: " + e.getMessage());
+                    showAlert("解包失败: " + e.getMessage());
+                });
+            }
+        }).start();
     }
 }

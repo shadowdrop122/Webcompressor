@@ -1,4 +1,5 @@
 compressor\utils\TransferSimulator$TransferRecord.class
+compressor\engine\ResourceDispatcher$CompressionResult.class
 compressor\gui\ChartBuilder$FileChartData.class
 compressor\gui\App.class
 compressor\utils\TransferSimulator$TransferEstimate.class
@@ -6,6 +7,8 @@ compressor\algorithms\WebDictCompressor.class
 compressor\algorithms\LZ77Compressor$Match.class
 compressor\gui\ChartBuilder$NodeBuilder.class
 compressor\utils\HashUtils.class
+compressor\engine\ResourceDispatcher.class
+compressor\gui\MainController$2.class
 compressor\algorithms\IncrementalCompressor$CompressionResult.class
 compressor\utils\BitInputStream.class
 compressor\utils\TransferSimulator.class
@@ -17,6 +20,7 @@ compressor\utils\BitOutputStream.class
 compressor\algorithms\TrieDictionary.class
 compressor\algorithms\HuffmanCompressor.class
 compressor\algorithms\HuffmanNode.class
+compressor\engine\WZipArchiver.class
 compressor\gui\CompressionService.class
 compressor\core\ICompressor.class
 compressor\gui\CompressorFactory$CompressorInfo.class
@@ -38,6 +42,7 @@ compressor\algorithms\TrieDictionary$MatchResult.class
 compressor\gui\ChartBuilder$1.class
 compressor\utils\FileUtils.class
 compressor\gui\CompressionService$CompressionResult$FileResult.class
+compressor\engine\WZipArchiver$FileEntry.class
 compressor\utils\TransferSimulator$BandwidthProfile.class
 compressor\gui\CompressionService$CompressionResult$ErrorResult.class
 compressor\algorithms\LZWImageCompressor.class

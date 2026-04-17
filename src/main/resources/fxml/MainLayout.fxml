@@ -24,6 +24,11 @@
                 </Menu>
                 <Menu text="压缩">
                     <MenuItem text="开始压缩" onAction="#handleStartCompression" accelerator="Shortcut+Enter"/>
+                    <MenuItem text="解压文件" onAction="#handleDecompress" accelerator="Shortcut+E"/>
+                    <SeparatorMenuItem/>
+                    <MenuItem text="网页归档" onAction="#handleArchiveWZip"/>
+                    <MenuItem text="解包归档" onAction="#handleExtractWZip"/>
+                    <SeparatorMenuItem/>
                     <MenuItem text="清空列表" onAction="#handleClearList"/>
                 </Menu>
                 <Menu text="帮助">
@@ -34,11 +39,22 @@
                 <Button text="选择文件" onAction="#handleSelectFiles" graphicTextGap="5"/>
                 <Button text="选择文件夹" onAction="#handleSelectDirectory" graphicTextGap="5"/>
                 <Separator orientation="VERTICAL"/>
+                <CheckBox fx:id="smartModeCheckBox" text="智能匹配" selected="true" alignment="CENTER"/>
+                <Separator orientation="VERTICAL"/>
                 <Label text="算法:"/>
                 <ComboBox fx:id="algorithmComboBox" prefWidth="180"/>
                 <Separator orientation="VERTICAL"/>
+                <Label text="图片质量:"/>
+                <Slider fx:id="imageQualitySlider" min="1" max="10" value="5"
+                        showTickLabels="true" showTickMarks="true" prefWidth="100"/>
+                <Label fx:id="imageQualityLabel" text="5"/>
+                <Separator orientation="VERTICAL"/>
                 <Button text="开始压缩" onAction="#handleStartCompression" styleClass="primary-button"/>
                 <Button text="停止" onAction="#handleStopCompression" styleClass="danger-button"/>
+                <Separator orientation="VERTICAL"/>
+                <Button text="解压" onAction="#handleDecompress" styleClass="secondary-button"/>
+                <Button text="网页归档" onAction="#handleArchiveWZip" styleClass="secondary-button"/>
+                <Button text="解包归档" onAction="#handleExtractWZip" styleClass="secondary-button"/>
             </ToolBar>
         </VBox>
     </top>

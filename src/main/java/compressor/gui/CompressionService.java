@@ -18,16 +18,26 @@ public class CompressionService extends Service<CompressionService.CompressionRe
     private CompressorFactory.CompressorType compressorType;
     private Path outputDirectory;
     private Consumer<String> logCallback;
+    private boolean smartMode = true;
+    private int imageQuality = 5;
 
     public CompressionService() {
     }
 
     public void configure(List<Path> files, CompressorFactory.CompressorType type,
                          Path outputDir, Consumer<String> logCallback) {
+        this.configure(files, type, outputDir, logCallback, true, 5);
+    }
+
+    public void configure(List<Path> files, CompressorFactory.CompressorType type,
+                         Path outputDir, Consumer<String> logCallback,
+                         boolean smartMode, int imageQuality) {
         this.selectedFiles = files;
         this.compressorType = type;
         this.outputDirectory = outputDir;
         this.logCallback = logCallback;
+        this.smartMode = smartMode;
+        this.imageQuality = imageQuality;
     }
 
     @Override
@@ -36,10 +46,11 @@ public class CompressionService extends Service<CompressionService.CompressionRe
             @Override
             protected CompressionResult call() throws Exception {
                 CompressionResult result = new CompressionResult();
-                ICompressor compressor = CompressorFactory.createCompressor(compressorType);
 
-                log("开始压缩，使用算法: " + compressor.getAlgorithmName());
+                log("开始压缩任务...");
                 log("选中文件数: " + selectedFiles.size());
+                log("使用智能匹配：根据文件类型自动选择压缩算法");
+                log("=".repeat(50));
 
                 long totalOriginal = 0;
                 long totalCompressed = 0;
@@ -55,6 +66,20 @@ public class CompressionService extends Service<CompressionService.CompressionRe
                     }
 
                     try {
+                        // 根据模式选择压缩器
+                        String extension = FileUtils.getFileExtension(file.getFileName().toString());
+                        CompressorFactory.CompressorType useType;
+
+                        if (smartMode) {
+                            // 智能模式：根据文件类型自动选择
+                            useType = CompressorFactory.getTypeFromExtension(extension);
+                        } else {
+                            // 手动模式：使用用户选择的算法
+                            useType = compressorType;
+                        }
+
+                        ICompressor compressor = createCompressorWithQuality(useType, extension);
+
                         long fileSize = Files.size(file);
                         totalOriginal += fileSize;
 
@@ -70,10 +95,10 @@ public class CompressionService extends Service<CompressionService.CompressionRe
                         CompressionStats stats = compressor.getStats();
                         double savingsPercent = (1.0 - (double) compressedSize / fileSize) * 100;
 
-                        log(String.format("[%d/%d] %s: %s -> %s (节省 %.1f%%)",
+                        log(String.format("[%d/%d] %s (%s) -> %s (节省 %.1f%%)",
                             i + 1, selectedFiles.size(),
                             file.getFileName(),
-                            formatSize(fileSize),
+                            useType.getName(),
                             formatSize(compressedSize),
                             savingsPercent));
 
@@ -82,7 +107,7 @@ public class CompressionService extends Service<CompressionService.CompressionRe
                             fileSize,
                             compressedSize,
                             stats.getElapsedMillis(),
-                            compressor.getAlgorithmName()
+                            useType.getName()
                         ));
 
                         if (compressor instanceof HuffmanCompressor huffman) {
@@ -105,7 +130,7 @@ public class CompressionService extends Service<CompressionService.CompressionRe
                 result.setTotalOriginalSize(totalOriginal);
                 result.setTotalCompressedSize(totalCompressed);
                 result.setTotalElapsedMillis(elapsed);
-                result.setAlgorithmName(compressor.getAlgorithmName());
+                result.setAlgorithmName("智能匹配");
 
                 TransferSimulator simulator = new TransferSimulator(TransferSimulator.BandwidthProfile.FOUR_G);
                 TransferSimulator.TransferEstimate estimate = simulator.estimateTransfer(totalOriginal, totalCompressed);
@@ -139,6 +164,13 @@ public class CompressionService extends Service<CompressionService.CompressionRe
         if (bytes < 1024 * 1024) return String.format("%.2f KB", bytes / 1024.0);
         if (bytes < 1024 * 1024 * 1024) return String.format("%.2f MB", bytes / (1024.0 * 1024));
         return String.format("%.2f GB", bytes / (1024.0 * 1024 * 1024));
+    }
+
+    private ICompressor createCompressorWithQuality(CompressorFactory.CompressorType type, String extension) {
+        if (type == CompressorFactory.CompressorType.POOLING_IMAGE) {
+            return new PoolingImageCompressor(imageQuality);
+        }
+        return CompressorFactory.createCompressor(type);
     }
 
     public static class CompressionResult {

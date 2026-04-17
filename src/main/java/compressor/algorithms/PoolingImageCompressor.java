@@ -27,16 +27,24 @@ public class PoolingImageCompressor extends AbstractCompressor {
 
     public static final String ALGORITHM_NAME = "PoolingImage";
     public static final String DESCRIPTION = "池化降质压缩 - 基于均值池化的有损图像压缩";
-    private static final int DEFAULT_QUALITY = 5; // 默认中等质量
+    private static int defaultQuality = 5; // 可配置的默认质量
 
     private final int quality; // 1-10，对应池化窗口大小 1x1 - 10x10
     private final LZWImageCompressor lzwCompressor;
 
+    public static void setDefaultQuality(int quality) {
+        defaultQuality = Math.max(1, Math.min(10, quality));
+    }
+
+    public static int getDefaultQuality() {
+        return defaultQuality;
+    }
+
     /**
-     * 默认构造函数，quality=5
+     * 默认构造函数，使用默认质量
      */
     public PoolingImageCompressor() {
-        this(DEFAULT_QUALITY);
+        this(defaultQuality);
     }
 
     /**
