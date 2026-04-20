@@ -1,0 +1,44 @@
+%% 数据处理流程图
+%% 展示文件从选择到压缩归档的完整流程
+flowchart TD
+    START([开始]) --> SELECT[选择文件/文件夹]
+    
+    SELECT --> SM{是否启用<br/>智能模式?}
+    
+    SM -->|是| DISPATCH[ResourceDispatcher<br/>自动选择算法]
+    SM -->|否| MANUAL[手动选择压缩算法]
+    
+    DISPATCH --> EXT{文件类型判断}
+    MANUAL --> EXT
+    
+    EXT -->|HTML/CSS/JS| BRO[选择 Brotli]
+    EXT -->|图片文件| POOL[选择 PoolingImage]
+    EXT -->|字体/二进制| LZ[选择 LZ77]
+    EXT -->|其他| BRO2[选择 Brotli]
+    
+    BRO --> READ[读取文件数据]
+    POOL --> READ
+    LZ --> READ
+    BRO2 --> READ
+    
+    READ --> COMPRESS
+    
+    COMPRESS -->|Huffman| HF[霍夫曼编码]
+    COMPRESS -->|LZ77| LZ77[滑动窗口压缩]
+    COMPRESS -->|Brotli| BROTLI[Brotli压缩]
+    COMPRESS -->|PoolingImage| PI[池化降采样]
+    
+    HF --> ARCHIVE
+    LZ77 --> ARCHIVE
+    BROTLI --> ARCHIVE
+    PI --> ARCHIVE
+    
+    ARCHIVE[生成WZip归档] --> SAVE[保存.wzip文件]
+    SAVE --> OUTPUT[显示压缩统计]
+    OUTPUT --> END([结束])
+    
+    style START fill:#4CAF50,color:#fff
+    style END fill:#f44336,color:#fff
+    style DISPATCH fill:#2196F3,color:#fff
+    style ARCHIVE fill:#FF9800,color:#fff
+    style COMPRESS fill:#9C27B0,color:#fff

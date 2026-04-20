@@ -1,0 +1,35 @@
+%% 智能调度决策流程图
+%% 展示ResourceDispatcher根据文件类型自动选择算法的逻辑
+flowchart TD
+    START([输入文件]) --> GET_EXT[获取文件扩展名]
+    
+    GET_EXT --> MATCH{文件类型判断}
+    
+    MATCH -->|.html .htm<br/>.css .js<br/>.txt .xml .json| TEXT[文本文件]
+    MATCH -->|.jpg .jpeg<br/>.png .gif<br/>.webp .bmp| IMAGE[图片文件]
+    MATCH -->|.woff .woff2<br/>.ttf .eot<br/>.otf .ico| FONT[字体/二进制]
+    MATCH -->|其他未知| DEFAULT[默认类型]
+    
+    TEXT --> ALGO1["算法: BrotliCompressor"]
+    IMAGE --> ALGO2["算法: PoolingImageCompressor"]
+    FONT --> ALGO3["算法: LZ77Compressor"]
+    DEFAULT --> ALGO4["算法: BrotliCompressor"]
+    
+    ALGO1 --> R1["压缩率: 60-80%<br/>内置优化字典<br/>Google网页优化"]
+    ALGO2 --> R2["压缩率: 50-90%<br/>有损压缩<br/>可调节质量1-10"]
+    ALGO3 --> R3["压缩率: 40-70%<br/>无损压缩<br/>基于重复模式"]
+    ALGO4 --> R4["压缩率: 60-80%<br/>通用高效<br/>对文本和二进制都有较好效果"]
+    
+    R1 --> FINAL[输出压缩结果]
+    R2 --> FINAL
+    R3 --> FINAL
+    R4 --> FINAL
+    
+    FINAL --> END([完成])
+    
+    style START fill:#4CAF50,color:#fff
+    style END fill:#4CAF50,color:#fff
+    style TEXT fill:#E3F2FD,stroke:#1976D2,stroke-width:3px
+    style IMAGE fill:#E8F5E9,stroke:#388E3C,stroke-width:3px
+    style FONT fill:#FFF3E0,stroke:#F57C00,stroke-width:3px
+    style DEFAULT fill:#F3E5F5,stroke:#7B1FA2,stroke-width:3px

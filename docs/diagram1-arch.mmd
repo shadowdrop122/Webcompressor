@@ -1,0 +1,76 @@
+%% 系统架构图
+%% WebCompressor 项目整体架构
+graph TB
+    subgraph GUI["表现层 (GUI)"]
+        A["App.java<br/>主程序入口"]
+        B["MainController<br/>控制器"]
+        C["CompressorFactory<br/>工厂模式"]
+        D["ChartBuilder<br/>图表构建"]
+        E["TreeVisualizer<br/>树可视化"]
+    end
+
+    subgraph CORE["核心层 (Core)"]
+        F["ICompressor<br/>压缩器接口"]
+        G["AbstractCompressor<br/>抽象基类"]
+    end
+
+    subgraph ALGORITHMS["算法层 (Algorithms)"]
+        H["HuffmanCompressor<br/>霍夫曼编码"]
+        I["LZ77Compressor<br/>滑动窗口"]
+        J["BrotliCompressor<br/>Brotli压缩"]
+        K["PoolingImageCompressor<br/>图像池化"]
+        L["LZWImageCompressor<br/>LZW图像"]
+    end
+
+    subgraph ENGINE["引擎层 (Engine)"]
+        M["ResourceDispatcher<br/>智能调度器"]
+        N["WZipArchiver<br/>归档器"]
+    end
+
+    subgraph MODEL["模型层 (Model)"]
+        O["CompressionStats<br/>压缩统计"]
+        P["CompressionManifest<br/>压缩清单"]
+    end
+
+    subgraph UTILS["工具层 (Utils)"]
+        R["BitInputStream<br/>位输入流"]
+        S["BitOutputStream<br/>位输出流"]
+        T["HuffmanCodeTree<br/>霍夫曼树"]
+        U["FileUtils<br/>文件工具"]
+    end
+
+    A --> B
+    B --> C
+    B --> D
+    B --> E
+    C --> F
+    M --> F
+    N --> F
+    F <|.. G
+    G <|-- H
+    G <|-- I
+    G <|-- J
+    G <|-- K
+    G <|-- L
+    H --> T
+    H --> R
+    H --> S
+    I --> R
+    I --> S
+    B --> M
+    B --> N
+    M --> H
+    M --> I
+    M --> J
+    M --> K
+    M --> L
+    N --> U
+    B --> O
+    B --> P
+
+    style GUI fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    style CORE fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style ALGORITHMS fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style ENGINE fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    style MODEL fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+    style UTILS fill:#fafafa,stroke:#455a64,stroke-width:2px

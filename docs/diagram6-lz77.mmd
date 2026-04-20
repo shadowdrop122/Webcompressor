@@ -1,0 +1,43 @@
+%% LZ77 滑动窗口原理图
+%% 展示LZ77压缩的滑动窗口机制和编码过程
+flowchart LR
+    subgraph SLIDING["滑动窗口结构"]
+        A["查找缓冲区<br/>(Search Buffer)<br/>已处理数据"] --> B["当前位置<br/>(Pointer)"]
+        B --> C["前向缓冲区<br/>(Lookahead Buffer)<br/>待处理数据"]
+        
+        D["... A B C A B D A | C A B D A ..."] 
+        E["← 窗口大小: 4096 →|"]
+        D -.-> A
+        D -.-> B
+        D -.-> C
+    end
+    
+    subgraph MATCH["匹配过程"]
+        F["待编码: 'A B D A'"] --> G["在查找缓冲区<br/>中搜索匹配"]
+        G --> H{"找到匹配?"}
+        H -->|是| I["记录引用<br/>&lt;偏移, 长度&gt;"]
+        H -->|否| J["输出字面量"]
+    end
+    
+    subgraph EXAMPLE["实际编码示例"]
+        K["原始数据: 'ABABABA'"]
+        K --> L["编码过程:"]
+        L --> M["1. 'A' → 字面量 A"]
+        L --> N["2. 'B' → 字面量 B"]
+        L --> O["3. 'ABA' 在缓冲区找到<br/>偏移=2, 长度=3"]
+        O --> P["输出令牌: [A][B]&lt;2,3&gt;"]
+        P --> Q["压缩结果:<br/>原始: 7 bytes<br/>编码: 4 tokens<br/>节省: 3 bytes"]
+    end
+    
+    subgraph TOKEN["令牌格式"]
+        R["LZ77 令牌结构"]
+        R --> S1["标志位(1bit): 1=字面量, 0=引用"]
+        R --> S2["字面量(8bit): 原始字节值"]
+        R --> S3["偏移(12bit): 回溯距离"]
+        R --> S4["长度(8bit): 匹配长度"]
+    end
+    
+    style SLIDING fill:#e3f2fd,stroke:#1976D2,stroke-width:2px
+    style MATCH fill:#fff3e0,stroke:#F57C00,stroke-width:2px
+    style EXAMPLE fill:#e8f5e9,stroke:#388E3C,stroke-width:2px
+    style TOKEN fill:#f3e5f5,stroke:#7B1FA2,stroke-width:2px

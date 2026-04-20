@@ -1,0 +1,55 @@
+%% 压缩算法性能对比
+%% 展示5种算法的各项指标对比
+flowchart LR
+    subgraph HEADER["压缩算法性能对比表"]
+        H1["算法"] 
+        H2["类型"] 
+        H3["适用文件"]
+        H4["压缩率"]
+        H5["主要特点"]
+    end
+    
+    HEADER --> ROW1
+    subgraph ROW1["Huffman 霍夫曼编码"]
+        R1A["Huffman"] 
+        R1B["无损"] 
+        R1C["文本文件"]
+        R1D["50-70%"]
+        R1E["基于字符频率<br/>变长编码<br/>需要存储编码表"]
+    end
+    
+    HEADER --> ROW2
+    subgraph ROW2["LZ77 滑动窗口"]
+        R2A["LZ77"] 
+        R2B["无损"] 
+        R2C["通用文件"]
+        R2D["40-70%"]
+        R2E["滑动窗口机制<br/>回溯引用<br/>重复模式检测"]
+    end
+    
+    HEADER --> ROW3
+    subgraph ROW3["Brotli"]
+        R3A["Brotli"] 
+        R3B["无损"] 
+        R3C["网页文件"]
+        R3D["60-80%"]
+        R3E["Google优化<br/>内置优化字典<br/>跨平台支持"]
+    end
+    
+    HEADER --> ROW4
+    subgraph ROW4["PoolingImage 池化压缩"]
+        R4A["PoolingImage"] 
+        R4B["有损"] 
+        R4C["图片文件"]
+        R4D["50-90%"]
+        R4E["均值池化降采样<br/>可调质量1-10<br/>高压缩率"]
+    end
+    
+    HEADER --> ROW5
+    subgraph ROW5["LZWImage"]
+        R5A["LZWImage"] 
+        R5B["无损"] 
+        R5C["图片文件"]
+        R5D["30-60%"]
+        R5E["基于ZLIB<br/>字典压缩<br/>GIF格式使用"]
+    end

@@ -55,6 +55,12 @@ public class ResourceDispatcher {
         extensionToStrategy.put(".svg", STRATEGY_BROTLI);
         extensionToStrategy.put(".md", STRATEGY_BROTLI);
 
+        // 服务器端脚本 - 使用Brotli压缩
+        extensionToStrategy.put(".php", STRATEGY_BROTLI);
+        extensionToStrategy.put(".jsp", STRATEGY_BROTLI);
+        extensionToStrategy.put(".asp", STRATEGY_BROTLI);
+        extensionToStrategy.put(".aspx", STRATEGY_BROTLI);
+
         // 图片类 - 使用池化压缩
         extensionToStrategy.put(".jpg", STRATEGY_POOLING_IMAGE);
         extensionToStrategy.put(".jpeg", STRATEGY_POOLING_IMAGE);
@@ -72,8 +78,8 @@ public class ResourceDispatcher {
         extensionToStrategy.put(".ico", STRATEGY_LZ77);
         extensionToStrategy.put(".bin", STRATEGY_LZ77);
 
-        // 其他未知类型 - 不压缩
-        extensionToStrategy.put(".unknown", STRATEGY_NONE);
+        // 其他未知类型 - 默认使用Brotli（对文本和二进制都有较好效果）
+        extensionToStrategy.put(".unknown", STRATEGY_BROTLI);
     }
 
     /**
@@ -90,7 +96,7 @@ public class ResourceDispatcher {
      * 根据文件后缀名获取压缩策略ID
      */
     public byte getStrategyByExtension(String filename) {
-        if (filename == null) return STRATEGY_NONE;
+        if (filename == null) return STRATEGY_BROTLI;
 
         String lower = filename.toLowerCase();
         for (Map.Entry<String, Byte> entry : extensionToStrategy.entrySet()) {
@@ -98,7 +104,8 @@ public class ResourceDispatcher {
                 return entry.getValue();
             }
         }
-        return STRATEGY_NONE;
+        // 未知扩展名也使用Brotli压缩（对文本和二进制都有较好效果）
+        return STRATEGY_BROTLI;
     }
 
     /**

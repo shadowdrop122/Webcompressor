@@ -118,21 +118,36 @@ public class WZipArchiver {
         long originalSize = originalData.length;
 
         byte[] compressedData;
+        String actualStrategyName = strategyName;
+
         // 根据是否指定压缩器决定压缩方式
         if (compressor != null) {
             // 使用指定压缩器
             compressedData = compressor.compress(originalData);
+            actualStrategyName = compressor.getAlgorithmName();
         } else {
             // 使用ResourceDispatcher智能选择
             ResourceDispatcher.CompressionResult result = dispatcher.compress(
                     entry.relativePath, originalData);
             compressedData = result.compressedData;
             strategyId = result.strategyId;
-            strategyName = result.strategyName;
+            actualStrategyName = result.strategyName;
+
+            // 诊断日志：显示策略选择过程
+            String extension = getFileExtension(entry.relativePath);
+            System.out.println("[智能匹配诊断] 文件: " + entry.relativePath +
+                    " | 扩展名: " + extension +
+                    " | 策略ID: " + strategyId +
+                    " | 算法: " + actualStrategyName +
+                    " | 原始: " + originalSize + " bytes" +
+                    " | 压缩后: " + compressedData.length + " bytes");
         }
 
-        // 写入相对路径（先写入长度，再写入内容）
+        // 计算元数据开销
         byte[] pathBytes = entry.relativePath.getBytes(StandardCharsets.UTF_8);
+        long metadataSize = 2 + pathBytes.length + 8 + 8 + 1; // 路径长度+路径+原始大小+压缩后大小+策略ID
+
+        // 写入相对路径（先写入长度，再写入内容）
         out.write((pathBytes.length >> 8) & 0xFF);
         out.write(pathBytes.length & 0xFF);
         out.write(pathBytes);
@@ -146,9 +161,22 @@ public class WZipArchiver {
         out.write(compressedData);
 
         double savingsPercent = originalSize > 0 ? (1.0 - (double) compressedData.length / originalSize) * 100 : 0;
-        log("  归档: " + entry.relativePath +
-                " (" + strategyName + ", " +
-                String.format("%.1f%%", savingsPercent) + ")");
+        double netSavingsPercent = originalSize > 0 ? (1.0 - (double) (compressedData.length + metadataSize) / originalSize) * 100 : 0;
+
+        // 诊断日志：显示实际压缩效果
+        System.out.println("  归档: " + entry.relativePath +
+                " (" + actualStrategyName + ", " +
+                String.format("原始压缩率:%.1f%%", savingsPercent) + ", " +
+                String.format("净压缩率(含元数据%.0fB):%.1f%%", (double)metadataSize, netSavingsPercent) + ")");
+    }
+
+    /**
+     * 获取文件扩展名
+     */
+    private String getFileExtension(String filename) {
+        if (filename == null) return "";
+        int lastDot = filename.lastIndexOf('.');
+        return lastDot > 0 ? filename.substring(lastDot) : "";
     }
 
     /**

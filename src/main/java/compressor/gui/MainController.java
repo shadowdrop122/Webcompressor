@@ -367,41 +367,40 @@ public class MainController {
         }
     }
 
-    private void updateCompressionChart() {
+   private void updateCompressionChart() {
         if (lastResult == null) return;
-
-        compressionChart.getData().clear();
-
-        XYChart.Series<String, Number> originalSeries = new XYChart.Series<>();
-        originalSeries.setName("原始大小");
-
-        XYChart.Series<String, Number> compressedSeries = new XYChart.Series<>();
-        compressedSeries.setName("压缩后");
-
-        for (CompressionService.CompressionResult.FileResult fr : lastResult.getFileResults()) {
-            String shortName = fr.getFileName();
-            if (shortName.length() > 15) {
-                shortName = shortName.substring(0, 12) + "...";
-            }
-            originalSeries.getData().add(new XYChart.Data<>(shortName, fr.getOriginalSize()));
-
-            // 【修复】如果 compressedSize 为 0（WZip归档模式），用总压缩大小除以文件数估算
-            long compressedSize = fr.getCompressedSize();
-            if (compressedSize == 0 && lastResult.getFileResults().size() > 0) {
-                // 估算每个文件的压缩后大小（按原始大小比例分配）
-                long totalOriginal = lastResult.getTotalOriginalSize();
-                long totalCompressed = lastResult.getTotalCompressedSize();
-                if (totalOriginal > 0) {
-                    compressedSize = (long) ((double) fr.getOriginalSize() / totalOriginal * totalCompressed);
-                }
-            }
-            compressedSeries.getData().add(new XYChart.Data<>(shortName, Math.max(1, compressedSize))); // 最小值1避免图表不显示
-        }
-
-        compressionChart.getData().addAll(originalSeries, compressedSeries);
 
         long totalOriginal = lastResult.getTotalOriginalSize();
         long totalCompressed = lastResult.getTotalCompressedSize();
+
+        // 1. 修复 Y 轴数字显示极其丑陋的问题 (将 5196739 显示为 5.2 MB)
+        NumberAxis yAxis = (NumberAxis) compressionChart.getYAxis();
+        if (yAxis != null) {
+            yAxis.setTickLabelFormatter(new NumberAxis.DefaultFormatter(yAxis, null, " B") {
+                @Override
+                public String toString(Number object) {
+                    double value = object.doubleValue();
+                    if (value >= 1_000_000) return String.format("%.1f MB", value / 1_000_000);
+                    if (value >= 1_000) return String.format("%.1f KB", value / 1_000);
+                    return String.format("%.0f B", value);
+                }
+            });
+        }
+
+        // 2. 核心修复：根据单文件/多文件自动选择渲染策略，调用你写好的 ChartBuilder
+        if (lastResult.getFileResults().size() > 1) {
+            // 如果是文件夹(归档模式)，不要把所有细碎文件画出来(会挤成0像素)
+            // 直接使用 ChartBuilder 的 Summary 方法画出总计对比
+            ChartBuilder.updateChartWithSummary(compressionChart, totalOriginal, totalCompressed);
+        } else {
+            // 如果是单一文件，转换数据格式并调用 ChartBuilder 进行绘制
+            List<ChartBuilder.FileChartData> chartDataList = lastResult.getFileResults().stream()
+                .map(fr -> new ChartBuilder.FileChartData(fr.getFileName(), fr.getOriginalSize(), fr.getCompressedSize()))
+                .collect(Collectors.toList());
+            ChartBuilder.populateChart(compressionChart, chartDataList);
+        }
+
+        // 3. 更新下方的统计文本
         chartOriginalSize.setText(FileUtils.formatFileSize(totalOriginal));
         chartCompressedSize.setText(FileUtils.formatFileSize(totalCompressed));
 
@@ -409,6 +408,19 @@ public class MainController {
             double savings = (1.0 - (double) totalCompressed / totalOriginal) * 100;
             chartSavings.setText(String.format("%.1f%%", savings));
         }
+    }
+
+    /**
+     * 根据最大值计算合适的刻度单位
+     */
+    private static double calculateTickUnit(double maxValue) {
+        if (maxValue <= 1024) return 200;
+        if (maxValue <= 10_000) return 2000;
+        if (maxValue <= 100_000) return 20000;
+        if (maxValue <= 1_000_000) return 200000;
+        if (maxValue <= 10_000_000) return 2000000;
+        if (maxValue <= 100_000_000) return 20000000;
+        return maxValue / 5;
     }
 
     private void updateTransferReport() {

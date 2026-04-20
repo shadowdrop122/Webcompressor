@@ -1,0 +1,100 @@
+%% 类图 - 核心接口与抽象类
+%% 展示策略模式和工厂模式的应用
+classDiagram
+    class ICompressor {
+        <<interface>>
+        +compress(byte[] data) byte[]
+        +decompress(byte[] data) byte[]
+        +getStats() CompressionStats
+        +getAlgorithmName() String
+        +getDescription() String
+    }
+
+    class AbstractCompressor {
+        <<abstract>>
+        #stats: CompressionStats
+        +startTiming()
+        +endTiming(long, long)
+        +ensureCapacity(byte[], int) byte[]
+        +getStats() CompressionStats
+    }
+
+    class HuffmanCompressor {
+        -codeTable: Map~Integer, String~
+        -reverseCodeTable: Map~String, Integer~
+        +compress(byte[]) byte[]
+        +decompress(byte[]) byte[]
+        +getCodeTable() Map
+        +getTreeStructure() String
+    }
+
+    class LZ77Compressor {
+        -WINDOW_SIZE: int = 4096
+        -LOOKAHEAD_SIZE: int = 256
+        -MIN_MATCH_LENGTH: int = 3
+        +compress(byte[]) byte[]
+        +decompress(byte[]) byte[]
+        -encode(byte[]) List~Token~
+        -findLongestMatch(byte[], int) Match
+    }
+
+    class BrotliCompressor {
+        -compressionLevel: int
+        +compress(byte[]) byte[]
+        +decompress(byte[]) byte[]
+        +compress(String) byte[]
+        +decompressToString(byte[]) String
+    }
+
+    class PoolingImageCompressor {
+        -quality: int
+        -defaultQuality: int
+        +compress(byte[]) byte[]
+        +decompress(byte[]) byte[]
+    }
+
+    class LZWImageCompressor {
+        +compress(byte[]) byte[]
+        +decompress(byte[]) byte[]
+    }
+
+    class CompressorFactory {
+        <<enumeration>>
+        HUFFMAN
+        LZ77
+        BROTLI
+        LZW_IMAGE
+        POOLING_IMAGE
+        +createCompressor(CompressorType) ICompressor
+        +createCompressor(String) ICompressor
+        +getTypeFromExtension(String) CompressorType
+        +getAvailableTypes() List
+    }
+
+    class ResourceDispatcher {
+        -instance: ResourceDispatcher
+        -compressorCache: Map
+        -extensionToStrategy: Map
+        +getInstance() ResourceDispatcher
+        +getStrategyByExtension(String) byte
+        +getCompressor(byte) ICompressor
+        +compress(String, byte[]) CompressionResult
+    }
+
+    ICompressor <|.. AbstractCompressor : implements
+    AbstractCompressor <|-- HuffmanCompressor : extends
+    AbstractCompressor <|-- LZ77Compressor : extends
+    AbstractCompressor <|-- BrotliCompressor : extends
+    AbstractCompressor <|-- PoolingImageCompressor : extends
+    AbstractCompressor <|-- LZWImageCompressor : extends
+    
+    CompressorFactory ..> HuffmanCompressor : creates
+    CompressorFactory ..> LZ77Compressor : creates
+    CompressorFactory ..> BrotliCompressor : creates
+    CompressorFactory ..> PoolingImageCompressor : creates
+    CompressorFactory ..> LZWImageCompressor : creates
+    
+    ResourceDispatcher ..> ICompressor : uses
+    ResourceDispatcher o-- BrotliCompressor : cache
+    ResourceDispatcher o-- LZ77Compressor : cache
+    ResourceDispatcher o-- PoolingImageCompressor : cache

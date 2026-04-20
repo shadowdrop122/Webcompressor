@@ -1,3 +1,4 @@
+compressor\gui\MainController$3.class
 compressor\utils\TransferSimulator$TransferRecord.class
 compressor\engine\ResourceDispatcher$CompressionResult.class
 compressor\gui\ChartBuilder$FileChartData.class

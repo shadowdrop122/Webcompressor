@@ -1,0 +1,30 @@
+%% Huffman 编码原理图
+%% 展示霍夫曼编码的四个步骤
+flowchart LR
+    subgraph STEP1["步骤1: 字符频率统计"]
+        A["原始文本:<br/>'ABRACADABRA'"] --> B["遍历每个字符<br/>统计出现次数"]
+        B --> C["频率表:<br/>A:5, B:2, R:2<br/>C:1, D:1"]
+    end
+    
+    subgraph STEP2["步骤2: 构建霍夫曼树"]
+        C --> D["初始: (A:5)(B:2)(R:2)(C:1)(D:1)"]
+        D --> E["第1轮合并: (A:5)(BCD:4)(R:2)"]
+        E --> F["第2轮合并: (ARBCD:6)(A:5)"]
+        F --> G["最终合并: Root(11)"]
+    end
+    
+    subgraph STEP3["步骤3: 生成编码表"]
+        H["遍历树<br/>左0右1"] --> I["根据路径<br/>生成编码"]
+        I --> J["A = 1 (路径: 右)<br/>R = 01 (路径: 左→右)<br/>B = 000 (路径: 左→左→左)<br/>C = 0010 (路径: 左→左→右→左)<br/>D = 0011 (路径: 左→左→右→右)"]
+    end
+    
+    subgraph STEP4["步骤4: 变长编码输出"]
+        K["ABRACADABRA"] --> L["逐字符替换"]
+        L --> M["1 000 01 1 0010 1 0011 1 000 01 1"]
+        M --> N["结果统计:<br/>原始: 88 bits (11字节×8)<br/>编码: 25 bits<br/>压缩率: 71.6%"]
+    end
+    
+    style STEP1 fill:#e3f2fd,stroke:#1976D2,stroke-width:2px
+    style STEP2 fill:#fff3e0,stroke:#F57C00,stroke-width:2px
+    style STEP3 fill:#e8f5e9,stroke:#388E3C,stroke-width:2px
+    style STEP4 fill:#fce4ec,stroke:#C2185B,stroke-width:2px

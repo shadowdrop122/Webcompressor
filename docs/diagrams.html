@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebCompressor 项目图表展示</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Microsoft YaHei", sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        .subtitle {
+            text-align: center;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 40px;
+            font-size: 1.1rem;
+        }
+        .diagram-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+        }
+        .diagram-title {
+            font-size: 1.4rem;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #667eea;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .diagram-title .num {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+        .mermaid {
+            display: flex;
+            justify-content: center;
+            background: #fafafa;
+            border-radius: 12px;
+            padding: 20px;
+            overflow-x: auto;
+        }
+        .tips {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin-bottom: 30px;
+            color: #856404;
+        }
+        .tips strong {
+            color: #721c24;
+        }
+        .algorithm-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        .algorithm-table th, .algorithm-table td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        .algorithm-table th {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        .algorithm-table tr:hover {
+            background: #f5f5f5;
+        }
+        .tag {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        .tag-lossless { background: #d4edda; color: #155724; }
+        .tag-lossy { background: #fff3cd; color: #856404; }
+        footer {
+            text-align: center;
+            color: rgba(255,255,255,0.8);
+            margin-top: 40px;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>WebCompressor 项目图表</h1>
+        <p class="subtitle">网页资源压缩系统的架构设计与流程说明</p>
+
+        <div class="tips">
+            <strong>提示：</strong>如果图表未显示，请检查网络连接。Mermaid.js 需要从 CDN 加载。
+            在图表上<strong>右键</strong>可保存为 PNG 图片。
+        </div>
+
+        <!-- 图1: 系统架构图 -->
+        <div class="diagram-card">
+            <h2 class="diagram-title"><span class="num">1</span>系统架构图</h2>
+            <pre class="mermaid">
+graph TB
+    subgraph GUI["表现层 (GUI)"]
+        A["App.java<br/>主程序入口"]
+        B["MainController<br/>控制器"]
+        C["CompressorFactory<br/>工厂模式"]
+        D["ChartBuilder<br/>图表构建"]
+        E["TreeVisualizer<br/>树可视化"]
+    end
+
+    subgraph CORE["核心层 (Core)"]
+        F["ICompressor<br/>压缩器接口"]
+        G["AbstractCompressor<br/>抽象基类"]
+    end
+
+    subgraph ALGORITHMS["算法层 (Algorithms)"]
+        H["HuffmanCompressor<br/>霍夫曼编码"]
+        I["LZ77Compressor<br/>滑动窗口"]
+        J["BrotliCompressor<br/>Brotli压缩"]
+        K["PoolingImageCompressor<br/>图像池化"]
+        L["LZWImageCompressor<br/>LZW图像"]
+    end
+
+    subgraph ENGINE["引擎层 (Engine)"]
+        M["ResourceDispatcher<br/>智能调度器"]
+        N["WZipArchiver<br/>归档器"]
+    end
+
+    subgraph UTILS["工具层 (Utils)"]
+        R["BitInputStream<br/>位输入流"]
+        S["BitOutputStream<br/>位输出流"]
+        T["HuffmanCodeTree<br/>霍夫曼树"]
+        U["FileUtils<br/>文件工具"]
+    end
+
+    A --> B
+    B --> C
+    B --> D
+    B --> E
+    C --> F
+    M --> F
+    N --> F
+    F <|.. G
+    G <|-- H
+    G <|-- I
+    G <|-- J
+    G <|-- K
+    G <|-- L
+    H --> T
+    H --> R
+    H --> S
+    I --> R
+    I --> S
+    B --> M
+    B --> N
+    M --> H
+    M --> I
+    M --> J
+    M --> K
+    M --> L
+    N --> U
+
+    style GUI fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    style CORE fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style ALGORITHMS fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style ENGINE fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    style UTILS fill:#fafafa,stroke:#455a64,stroke-width:2px
+            </pre>
+        </div>
+
+        <!-- 图2: 类图 -->
+        <div class="diagram-card">
+            <h2 class="diagram-title"><span class="num">2</span>核心类图</h2>
+            <pre class="mermaid">
+classDiagram
+    class ICompressor {
+        <<interface>>
+        +compress(byte[] data) byte[]
+        +decompress(byte[] data) byte[]
+        +getStats() CompressionStats
+        +getAlgorithmName() String
+        +getDescription() String
+    }
+
+    class AbstractCompressor {
+        <<abstract>>
+        #stats: CompressionStats
+        +startTiming()
+        +endTiming(long, long)
+        +getStats() CompressionStats
+    }
+
+    class HuffmanCompressor {
+        -codeTable: Map~Integer, String~
+        +compress(byte[]) byte[]
+        +decompress(byte[]) byte[]
+        +getCodeTable() Map
+    }
+
+    class LZ77Compressor {
+        -WINDOW_SIZE: int = 4096
+        -LOOKAHEAD_SIZE: int = 256
+        +compress(byte[]) byte[]
+        +decompress(byte[]) byte[]
+    }
+
+    class BrotliCompressor {
+        -compressionLevel: int
+        +compress(byte[]) byte[]
+        +decompress(byte[]) byte[]
+    }
+
+    class PoolingImageCompressor {
+        -quality: int
+        +compress(byte[]) byte[]
+        +decompress(byte[]) byte~
+    }
+
+    class LZWImageCompressor {
+        +compress(byte[]) byte[]
+        +decompress(byte[]) byte[]
+    }
+
+    class CompressorFactory {
+        <<enumeration>>
+        HUFFMAN
+        LZ77
+        BROTLI
+        LZW_IMAGE
+        POOLING_IMAGE
+        +createCompressor(CompressorType) ICompressor
+    }
+
+    class ResourceDispatcher {
+        +getInstance() ResourceDispatcher
+        +getStrategyByExtension(String) byte
+        +getCompressor(byte) ICompressor
+    }
+
+    ICompressor <|.. AbstractCompressor
+    AbstractCompressor <|-- HuffmanCompressor
+    AbstractCompressor <|-- LZ77Compressor
+    AbstractCompressor <|-- BrotliCompressor
+    AbstractCompressor <|-- PoolingImageCompressor
+    AbstractCompressor <|-- LZWImageCompressor
+    CompressorFactory ..> HuffmanCompressor
+    CompressorFactory ..> LZ77Compressor
+    CompressorFactory ..> BrotliCompressor
+    ResourceDispatcher ..> ICompressor
+            </pre>
+        </div>
+
+        <!-- 图3: 数据处理流程图 -->
+        <div class="diagram-card">
+            <h2 class="diagram-title"><span class="num">3</span>数据处理流程图</h2>
+            <pre class="mermaid">
+flowchart TD
+    START([开始]) --> SELECT[选择文件/文件夹]
+    
+    SELECT --> SM{是否启用<br/>智能模式?}
+    
+    SM -->|是| DISPATCH[ResourceDispatcher<br/>自动选择算法]
+    SM -->|否| MANUAL[手动选择压缩算法]
+    
+    DISPATCH --> EXT{文件类型判断}
+    MANUAL --> EXT
+    
+    EXT -->|HTML/CSS/JS| BRO[选择 Brotli]
+    EXT -->|图片文件| POOL[选择 PoolingImage]
+    EXT -->|字体/二进制| LZ[选择 LZ77]
+    EXT -->|其他| BRO2[选择 Brotli]
+    
+    BRO --> READ[读取文件数据]
+    POOL --> READ
+    LZ --> READ
+    BRO2 --> READ
+    
+    READ --> COMPRESS
+    
+    COMPRESS -->|Huffman| HF[霍夫曼编码]
+    COMPRESS -->|LZ77| LZ77[滑动窗口压缩]
+    COMPRESS -->|Brotli| BROTLI[Brotli压缩]
+    COMPRESS -->|PoolingImage| PI[池化降采样]
+    
+    HF --> ARCHIVE
+    LZ77 --> ARCHIVE
+    BROTLI --> ARCHIVE
+    PI --> ARCHIVE
+    
+    ARCHIVE[生成WZip归档] --> SAVE[保存.wzip文件]
+    SAVE --> END([结束])
+    
+    style START fill:#4CAF50,color:#fff
+    style END fill:#f44336,color:#fff
+    style DISPATCH fill:#2196F3,color:#fff
+    style ARCHIVE fill:#FF9800,color:#fff
+            </pre>
+        </div>
+
+        <!-- 图4: 智能调度流程图 -->
+        <div class="diagram-card">
+            <h2 class="diagram-title"><span class="num">4</span>智能调度决策流程图</h2>
+            <pre class="mermaid">
+flowchart TD
+    START([输入文件]) --> GET_EXT[获取文件扩展名]
+    
+    GET_EXT --> MATCH
+    
+    MATCH{文件类型} -->|.html .css .js| TEXT[文本文件]
+    MATCH -->|.jpg .png .gif| IMAGE[图片文件]
+    MATCH -->|.woff .ttf .otf| FONT[字体文件]
+    MATCH -->|其他| DEFAULT[默认类型]
+    
+    TEXT --> ALGO1["算法: BrotliCompressor"]
+    IMAGE --> ALGO2["算法: PoolingImageCompressor"]
+    FONT --> ALGO3["算法: LZ77Compressor"]
+    DEFAULT --> ALGO4["算法: BrotliCompressor"]
+    
+    ALGO1 --> R1["压缩率: 60-80%<br/>内置优化字典"]
+    ALGO2 --> R2["压缩率: 50-90%<br/>有损压缩,可调质量"]
+    ALGO3 --> R3["压缩率: 40-70%<br/>基于重复模式"]
+    ALGO4 --> R4["压缩率: 60-80%<br/>通用高效"]
+    
+    R1 --> FINAL[输出压缩结果]
+    R2 --> FINAL
+    R3 --> FINAL
+    R4 --> FINAL
+    
+    FINAL --> END([完成])
+    
+    style START fill:#4CAF50,color:#fff
+    style END fill:#4CAF50,color:#fff
+    style TEXT fill:#E3F2FD,stroke:#1976D2
+    style IMAGE fill:#E8F5E9,stroke:#388E3C
+    style FONT fill:#FFF3E0,stroke:#F57C00
+            </pre>
+        </div>
+
+        <!-- 图5: Huffman原理图 -->
+        <div class="diagram-card">
+            <h2 class="diagram-title"><span class="num">5</span>Huffman 编码原理图</h2>
+            <pre class="mermaid">
+flowchart LR
+    subgraph STEP1["步骤1: 字符频率统计"]
+        A["原始文本:<br/>'ABRACADABRA'"] --> B["频率统计:<br/>A:5, B:2, R:2<br/>C:1, D:1"]
+    end
+    
+    subgraph STEP2["步骤2: 构建霍夫曼树"]
+        B --> C["(A:5) (B:2) (R:2) (C:1) (D:1)"]
+        C --> D["合并最小节点"]
+        D --> E["重复直到只剩根节点"]
+    end
+    
+    subgraph STEP3["步骤3: 生成编码表"]
+        F["左分支=0, 右分支=1"] --> G["A = 1<br/>R = 01<br/>B = 000<br/>C = 0010<br/>D = 0011"]
+    end
+    
+    subgraph STEP4["步骤4: 变长编码"]
+        H["ABRACADABRA"] --> I["1 000 01 1 0010 1 0011 1 000 01 1"]
+        I --> J["原始: 88 bits<br/>编码: 25 bits<br/>压缩率: 71.6%"]
+    end
+    
+    style STEP1 fill:#e3f2fd
+    style STEP2 fill:#fff3e0
+    style STEP3 fill:#e8f5e9
+    style STEP4 fill:#fce4ec
+            </pre>
+        </div>
+
+        <!-- 图6: LZ77原理图 -->
+        <div class="diagram-card">
+            <h2 class="diagram-title"><span class="num">6</span>LZ77 滑动窗口原理图</h2>
+            <pre class="mermaid">
+flowchart LR
+    subgraph SLIDING["滑动窗口结构"]
+        A["查找缓冲区<br/>(已处理数据)"] --> B["当前位置"]
+        B --> C["前向缓冲区<br/>(待处理数据)"]
+    end
+    
+    subgraph EXAMPLE["编码示例"]
+        D["原始: 'ABABABA'"] --> E["处理过程:"]
+        E --> F["1. 'A' → 字面量 A"]
+        E --> G["2. 'B' → 字面量 B"]
+        E --> H["3. 'ABA' → 引用&lt;2,3&gt;<br/>(偏移2,长度3)"]
+        H --> I["输出: [A][B]&lt;2,3&gt;"]
+    end
+    
+    subgraph TOKEN["令牌格式"]
+        J["(1, offset, length)"] --> K["1=字面量"]
+        J --> L["(0, offset, length)"] --> M["0=引用"]
+    end
+    
+    style SLIDING fill:#e3f2fd
+    style EXAMPLE fill:#fff3e0
+    style TOKEN fill:#e8f5e9
+            </pre>
+        </div>
+
+        <!-- 图7: 算法对比 -->
+        <div class="diagram-card">
+            <h2 class="diagram-title"><span class="num">7</span>压缩算法性能对比</h2>
+            <table class="algorithm-table">
+                <thead>
+                    <tr>
+                        <th>算法</th>
+                        <th>类型</th>
+                        <th>适用文件</th>
+                        <th>压缩率</th>
+                        <th>特点</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Huffman</strong></td>
+                        <td><span class="tag tag-lossless">无损</span></td>
+                        <td>文本文件</td>
+                        <td>50-70%</td>
+                        <td>基于字符频率的变长编码</td>
+                    </tr>
+                    <tr>
+                        <td><strong>LZ77</strong></td>
+                        <td><span class="tag tag-lossless">无损</span></td>
+                        <td>通用文件</td>
+                        <td>40-70%</td>
+                        <td>滑动窗口+回溯引用</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Brotli</strong></td>
+                        <td><span class="tag tag-lossless">无损</span></td>
+                        <td>网页文件</td>
+                        <td>60-80%</td>
+                        <td>Google优化,内置字典</td>
+                    </tr>
+                    <tr>
+                        <td><strong>PoolingImage</strong></td>
+                        <td><span class="tag tag-lossy">有损</span></td>
+                        <td>图片文件</td>
+                        <td>50-90%</td>
+                        <td>均值池化降采样</td>
+                    </tr>
+                    <tr>
+                        <td><strong>LZWImage</strong></td>
+                        <td><span class="tag tag-lossless">无损</span></td>
+                        <td>图片文件</td>
+                        <td>30-60%</td>
+                        <td>基于ZLIB的字典压缩</td>
+                    </tr>
+                </tbody>
+            </table>
+            <pre class="mermaid" style="display:none">
+bar-xy
+    title 压缩率对比
+    x-axis 算法
+    y-axis 压缩率 (%)
+    Huffman: 60
+    LZ77: 55
+    Brotli: 70
+    PoolingImage: 75
+    LZWImage: 45
+            </pre>
+        </div>
+
+        <footer>
+            <p>WebCompressor 项目图表展示 | 生成时间: 2026年4月</p>
+        </footer>
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            securityLevel: 'loose',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis'
+            },
+            class: {
+                useMaxWidth: true
+            }
+        });
+    </script>
+</body>
+</html>

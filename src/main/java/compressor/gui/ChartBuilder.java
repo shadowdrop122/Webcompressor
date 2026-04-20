@@ -54,6 +54,24 @@ public class ChartBuilder {
         XYChart.Series<String, Number> savingsSeries = new XYChart.Series<>();
         savingsSeries.setName("节省空间");
 
+        // 计算动态 Y 轴范围
+        double maxValue = 0;
+        for (FileChartData data : dataList) {
+            if (data.originalSize > maxValue) maxValue = data.originalSize;
+            if (data.compressedSize > maxValue) maxValue = data.compressedSize;
+        }
+        // 设置 Y 轴最大值为最大原始大小的 120%
+        double yAxisMax = maxValue * 1.2;
+
+        // 获取 Y 轴并动态设置范围
+        NumberAxis yAxis = (NumberAxis) chart.getYAxis();
+        if (yAxis != null) {
+            yAxis.setAutoRanging(false); // 禁用自动范围
+            yAxis.setLowerBound(0);
+            yAxis.setUpperBound(Math.max(yAxisMax, 1024));
+            yAxis.setTickUnit(calculateTickUnit(yAxisMax));
+        }
+
         for (FileChartData data : dataList) {
             String label = shortenFileName(data.fileName);
 
@@ -71,6 +89,19 @@ public class ChartBuilder {
         }
     }
 
+    /**
+     * 根据最大值计算合适的刻度单位
+     */
+    private static double calculateTickUnit(double maxValue) {
+        if (maxValue <= 1024) return 200;           // 小于 1KB
+        if (maxValue <= 10_000) return 2000;        // 小于 10KB
+        if (maxValue <= 100_000) return 20000;      // 小于 100KB
+        if (maxValue <= 1_000_000) return 200000;   // 小于 1MB
+        if (maxValue <= 10_000_000) return 2000000; // 小于 10MB
+        if (maxValue <= 100_000_000) return 20000000; // 小于 100MB
+        return maxValue / 5;                        // 其他情况
+    }
+
     public static void updateChartWithSummary(BarChart<String, Number> chart,
                                              long totalOriginal,
                                              long totalCompressed) {
@@ -81,6 +112,16 @@ public class ChartBuilder {
 
         series.getData().add(new XYChart.Data<>("原始大小", totalOriginal));
         series.getData().add(new XYChart.Data<>("压缩后", totalCompressed));
+
+        // 动态设置 Y 轴范围
+        NumberAxis yAxis = (NumberAxis) chart.getYAxis();
+        if (yAxis != null) {
+            double maxValue = Math.max(totalOriginal, totalCompressed);
+            yAxis.setAutoRanging(false); // 禁用自动范围
+            yAxis.setLowerBound(0);
+            yAxis.setUpperBound(maxValue * 1.2);
+            yAxis.setTickUnit(calculateTickUnit(maxValue));
+        }
 
         chart.getData().add(series);
     }

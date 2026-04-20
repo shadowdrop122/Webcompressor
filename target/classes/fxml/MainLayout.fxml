@@ -123,7 +123,7 @@
                                     <CategoryAxis label="文件"/>
                                 </xAxis>
                                 <yAxis>
-                                    <NumberAxis label="大小 (bytes)"/>
+                                    <NumberAxis label="大小 (bytes)" autoRanging="false"/>
                                 </yAxis>
                             </BarChart>
                             <HBox spacing="10" alignment="CENTER">
