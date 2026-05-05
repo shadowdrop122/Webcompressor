@@ -14,6 +14,7 @@ compressor\utils\HashUtils.class
 compressor\engine\ResourceDispatcher.class
 compressor\gui\MainController$2.class
 compressor\algorithms\IncrementalCompressor$CompressionResult.class
+compressor\utils\MagicNumberDetector.class
 compressor\utils\BitInputStream.class
 compressor\utils\CanonicalCode.class
 compressor\utils\TransferSimulator.class
@@ -60,4 +61,5 @@ compressor\utils\FrequencyTable.class
 compressor\model\CompressionStats.class
 compressor\utils\FrequencyTable$HuffmanNodeWithFreq.class
 compressor\utils\HuffmanCodeTree.class
+compressor\utils\MagicNumberDetector$ImageType.class
 compressor\gui\MainController$1.class

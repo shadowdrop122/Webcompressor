@@ -16,6 +16,7 @@ public class HuffmanCompressor extends AbstractCompressor {
 
     private Map<Integer, String> codeTable;
     private Map<String, Integer> reverseCodeTable;
+    private HuffmanNode root;
 
     public HuffmanCompressor() {
         super();
@@ -41,11 +42,11 @@ public class HuffmanCompressor extends AbstractCompressor {
 
         startTiming();
         long[] frequencies = countFrequencies(data);
-        HuffmanNode root = buildHuffmanTree(frequencies);
+        this.root = buildHuffmanTree(frequencies);
 
         codeTable.clear();
         reverseCodeTable.clear();
-        generateCodeTable(root, new StringBuilder());
+        generateCodeTable(this.root, new StringBuilder());
 
         BitOutputStream bitOut = new BitOutputStream();
         for (byte b : data) {
@@ -96,7 +97,7 @@ public class HuffmanCompressor extends AbstractCompressor {
             frequencies[i] = readLong(in);
         }
 
-        HuffmanNode root = buildHuffmanTree(frequencies);
+        this.root = buildHuffmanTree(frequencies);
 
         long originalSize = 0;
         for (long freq : frequencies) {
@@ -111,13 +112,13 @@ public class HuffmanCompressor extends AbstractCompressor {
 
         int charsToRead = (int) originalSize;
         int charsRead = 0;
-        HuffmanNode current = root;
+        HuffmanNode current = this.root;
 
         while (charsRead < charsToRead && current != null) {
             if (current.isLeaf()) {
                 result.write(current.getByteValue());
                 charsRead++;
-                current = root;
+                current = this.root;
             } else {
                 int bit = bitIn.readBit();
                 if (bit == -1) break;
@@ -206,7 +207,7 @@ public class HuffmanCompressor extends AbstractCompressor {
     }
 
     public String getTreeStructure() {
-        return getTreeStructure("", "", null);
+        return getTreeStructure("", "", this.root);
     }
 
     private String getTreeStructure(String prefix, String edgeLabel, HuffmanNode node) {

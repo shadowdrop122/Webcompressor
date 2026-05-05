@@ -5,14 +5,18 @@ import compressor.algorithms.LZ77Compressor;
 import compressor.algorithms.PoolingImageCompressor;
 import compressor.algorithms.LZWImageCompressor;
 import compressor.algorithms.BrotliCompressor;
+import compressor.utils.MagicNumberDetector;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * 智能资源调度器
  * 根据文件类型自动选择合适的压缩算法
+ * 支持扩展名判断 + 魔数探测双重保障
  */
 public class ResourceDispatcher {
 
@@ -185,10 +189,27 @@ public class ResourceDispatcher {
 
     /**
      * 压缩数据（根据文件类型自动选择算法）
+     * 支持双重识别：扩展名判断 + 魔数探测
      */
     public CompressionResult compress(String filename, byte[] data) throws IOException {
         byte strategyId = getStrategyByExtension(filename);
         ICompressor compressor = getCompressor(strategyId);
+
+        // 扩展名无法识别时，使用魔数探测
+        if (compressor == null || strategyId == STRATEGY_BROTLI) {
+            // 检查扩展名是否可疑（空或未知）
+            String extension = MagicNumberDetector.getExtension(filename);
+            if (MagicNumberDetector.isSuspiciousExtension(extension)) {
+                MagicNumberDetector.ImageType imageType = MagicNumberDetector.detectImageType(data);
+                if (imageType != MagicNumberDetector.ImageType.UNKNOWN) {
+                    // 通过魔数识别为图片，切换到PoolingImage压缩策略
+                    strategyId = STRATEGY_POOLING_IMAGE;
+                    compressor = getCompressor(strategyId);
+                    System.out.println("[智能匹配诊断] 文件无扩展名，通过 Magic Number 识别为 [" +
+                            imageType.getDisplayName() + "] -> 路由至 PoolingImage");
+                }
+            }
+        }
 
         if (compressor == null) {
             return new CompressionResult(filename, data, data.length, STRATEGY_NONE, "不压缩");
@@ -208,6 +229,46 @@ public class ResourceDispatcher {
             );
         } catch (IOException e) {
             // 压缩失败，返回原始数据不压缩
+            return new CompressionResult(filename, data, data.length, STRATEGY_NONE, "压缩失败-原样");
+        }
+    }
+
+    /**
+     * 压缩数据（根据文件路径自动选择算法，支持魔数探测）
+     */
+    public CompressionResult compress(Path filePath, byte[] data) throws IOException {
+        String filename = filePath.getFileName().toString();
+        byte strategyId = getStrategyByExtension(filename);
+        ICompressor compressor = getCompressor(strategyId);
+
+        // 扩展名无法识别或为Brotli时，使用魔数探测
+        if (compressor == null || strategyId == STRATEGY_BROTLI) {
+            String extension = MagicNumberDetector.getExtension(filename);
+            if (MagicNumberDetector.isSuspiciousExtension(extension)) {
+                MagicNumberDetector.ImageType imageType = MagicNumberDetector.detectImageType(data);
+                if (imageType != MagicNumberDetector.ImageType.UNKNOWN) {
+                    strategyId = STRATEGY_POOLING_IMAGE;
+                    compressor = getCompressor(strategyId);
+                    System.out.println("[智能匹配诊断] 文件无扩展名，通过 Magic Number 识别为 [" +
+                            imageType.getDisplayName() + "] -> 路由至 PoolingImage");
+                }
+            }
+        }
+
+        if (compressor == null) {
+            return new CompressionResult(filename, data, data.length, STRATEGY_NONE, "不压缩");
+        }
+
+        try {
+            byte[] compressed = compressor.compress(data);
+            return new CompressionResult(
+                filename,
+                compressed,
+                data.length,
+                strategyId,
+                compressor.getAlgorithmName()
+            );
+        } catch (IOException e) {
             return new CompressionResult(filename, data, data.length, STRATEGY_NONE, "压缩失败-原样");
         }
     }

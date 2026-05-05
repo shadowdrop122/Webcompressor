@@ -15,6 +15,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.chart.BarChart;
+import javafx.scene.layout.VBox;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
@@ -130,6 +131,9 @@ public class MainController {
 
         fileTable.getColumns().addAll(nameCol, sizeCol, typeCol);
         fileTable.setItems(fileEntries);
+
+        // 树结构可视化 TextArea 自动填充可用空间
+        VBox.setVgrow(treeVisualization, javafx.scene.layout.Priority.ALWAYS);
 
         setupCompressionService();
         startMemoryMonitor();

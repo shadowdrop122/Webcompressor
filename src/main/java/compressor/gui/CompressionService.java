@@ -184,6 +184,11 @@ public class CompressionService extends Service<CompressionService.CompressionRe
 
                 if (compressorToUse != null) {
                     archiver.archiveFiles(allFiles, baseDir, outputPath, compressorToUse);
+
+                    if (compressorToUse instanceof HuffmanCompressor huffman) {
+                        result.setHuffmanTree(huffman.getTreeStructure());
+                        result.setCodeTable(huffman.getCodeTable());
+                    }
                 } else {
                     archiver.archiveFiles(allFiles, baseDir, outputPath);
                 }

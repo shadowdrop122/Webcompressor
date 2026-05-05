@@ -77,7 +77,11 @@ public class PoolingImageCompressor extends AbstractCompressor {
         // 1. 读取原始图片
         BufferedImage originalImage = ImageIO.read(new ByteArrayInputStream(data));
         if (originalImage == null) {
-            throw new IOException("无法解析图片数据");
+            // 防崩兜底：如果ImageIO无法解析图片，返回原始数据不压缩
+            // 这种情况可能发生在特殊的WebP格式或损坏的图片数据
+            endTiming(data.length, data.length);
+            System.out.println("[PoolingImage] 无法解析图片数据，保持原始大小");
+            return data;
         }
 
         int originalWidth = originalImage.getWidth();
@@ -166,16 +170,33 @@ public class PoolingImageCompressor extends AbstractCompressor {
         // 5. 从池化后的byte[]重建BufferedImage
         BufferedImage pooledImage = bytesToImage(pooledBytes);
         if (pooledImage == null) {
-            throw new IOException("无法重建池化后的图像");
+            // 防崩兜底：如果无法重建图像，返回原始池化PNG数据
+            // 虽然没有放大到原始尺寸，但至少能显示缩小版本，不会中断解压流程
+            System.out.println("[PoolingImage] 无法重建池化图像，降级返回缩小的PNG数据");
+            endTiming(data.length, pooledBytes.length);
+            return pooledBytes;
         }
 
         // 6. 最近邻插值放大到原始尺寸（马赛克效果）
         BufferedImage restoredImage = nearestNeighborUpscale(pooledImage, originalWidth, originalHeight);
+        if (restoredImage == null) {
+            // 放大失败，降级返回池化PNG
+            System.out.println("[PoolingImage] 图像放大失败，降级返回缩小的PNG数据");
+            endTiming(data.length, pooledBytes.length);
+            return pooledBytes;
+        }
 
         // 7. 转换为byte[]输出
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         ImageIO.write(restoredImage, "png", out);
         byte[] result = out.toByteArray();
+
+        // 检查输出是否有效
+        if (result == null || result.length == 0) {
+            System.out.println("[PoolingImage] PNG输出无效，降级返回缩小的PNG数据");
+            endTiming(data.length, pooledBytes.length);
+            return pooledBytes;
+        }
 
         endTiming(result.length, data.length);
         return result;

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="compressor.algorithms.WebDictCompressorTest" time="0.029" tests="10" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="compressor.algorithms.WebDictCompressorTest" time="0.03" tests="10" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.specification.version" value="25"/>
     <property name="sun.cpu.isalist" value="amd64"/>
@@ -15,9 +15,8 @@
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="user.country" value="CN"/>
     <property name="sun.boot.library.path" value="C:\Program Files\Eclipse Adoptium\jdk-25.0.1.8-hotspot\bin"/>
-    <property name="sun.java.command" value="C:\Users\21764\AppData\Local\Temp\surefire14170413300381216146\surefirebooter-20260417191956699_3.jar C:\Users\21764\AppData\Local\Temp\surefire14170413300381216146 2026-04-17T19-19-56_589-jvmRun1 surefire-20260417191956699_1tmp surefire_0-20260417191956699_2tmp"/>
+    <property name="sun.java.command" value="C:\Users\21764\AppData\Local\Temp\surefire7441079635211548483\surefirebooter-20260504150910922_3.jar C:\Users\21764\AppData\Local\Temp\surefire7441079635211548483 2026-05-04T15-09-10_789-jvmRun1 surefire-20260504150910922_1tmp surefire_0-20260504150910922_2tmp"/>
     <property name="jdk.debug" value="release"/>
-    <property name="test" value="BrotliCompressorTest,WebDictCompressorTest,HuffmanCompressorTest"/>
     <property name="surefire.test.class.path" value="F:\Cursor_code\WebCompressor\target\test-classes;F:\Cursor_code\WebCompressor\target\classes;C:\Users\21764\.m2\repository\org\openjfx\javafx-controls\17.0.2\javafx-controls-17.0.2.jar;C:\Users\21764\.m2\repository\org\openjfx\javafx-controls\17.0.2\javafx-controls-17.0.2-win.jar;C:\Users\21764\.m2\repository\org\openjfx\javafx-graphics\17.0.2\javafx-graphics-17.0.2.jar;C:\Users\21764\.m2\repository\org\openjfx\javafx-graphics\17.0.2\javafx-graphics-17.0.2-win.jar;C:\Users\21764\.m2\repository\org\openjfx\javafx-base\17.0.2\javafx-base-17.0.2.jar;C:\Users\21764\.m2\repository\org\openjfx\javafx-base\17.0.2\javafx-base-17.0.2-win.jar;C:\Users\21764\.m2\repository\org\openjfx\javafx-fxml\17.0.2\javafx-fxml-17.0.2.jar;C:\Users\21764\.m2\repository\org\openjfx\javafx-fxml\17.0.2\javafx-fxml-17.0.2-win.jar;C:\Users\21764\.m2\repository\org\junit\jupiter\junit-jupiter\5.9.2\junit-jupiter-5.9.2.jar;C:\Users\21764\.m2\repository\org\junit\jupiter\junit-jupiter-api\5.9.2\junit-jupiter-api-5.9.2.jar;C:\Users\21764\.m2\repository\org\opentest4j\opentest4j\1.2.0\opentest4j-1.2.0.jar;C:\Users\21764\.m2\repository\org\junit\platform\junit-platform-commons\1.9.2\junit-platform-commons-1.9.2.jar;C:\Users\21764\.m2\repository\org\apiguardian\apiguardian-api\1.1.2\apiguardian-api-1.1.2.jar;C:\Users\21764\.m2\repository\org\junit\jupiter\junit-jupiter-params\5.9.2\junit-jupiter-params-5.9.2.jar;C:\Users\21764\.m2\repository\org\junit\jupiter\junit-jupiter-engine\5.9.2\junit-jupiter-engine-5.9.2.jar;C:\Users\21764\.m2\repository\org\junit\platform\junit-platform-engine\1.9.2\junit-platform-engine-1.9.2.jar;"/>
     <property name="sun.cpu.endian" value="little"/>
     <property name="user.home" value="C:\Users\21764"/>
@@ -31,7 +30,7 @@
     <property name="line.separator" value="&#10;"/>
     <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
     <property name="java.specification.name" value="Java Platform API Specification"/>
-    <property name="surefire.real.class.path" value="C:\Users\21764\AppData\Local\Temp\surefire14170413300381216146\surefirebooter-20260417191956699_3.jar"/>
+    <property name="surefire.real.class.path" value="C:\Users\21764\AppData\Local\Temp\surefire7441079635211548483\surefirebooter-20260504150910922_3.jar"/>
     <property name="user.script" value=""/>
     <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
     <property name="java.runtime.version" value="25.0.1+8-LTS"/>
@@ -52,7 +51,7 @@
     <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
     <property name="sun.os.patch.level" value=""/>
     <property name="native.encoding" value="GBK"/>
-    <property name="java.library.path" value="C:\Program Files\Eclipse Adoptium\jdk-25.0.1.8-hotspot\bin;C:\WINDOWS\Sun\Java\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\Program Files\Eclipse Adoptium\jdk-25.0.1.8-hotspot\bin;D:\Python\Scripts;D:\Python;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0;C:\Windows\System32\OpenSSH;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Program Files (x86)\Windows Kits\10\Windows Performance Toolkit;C:\Program Files\dotnet;D:\VSCode\Microsoft VS Code\bin;D:\VSCode\mingw64\bin;D:\Git\cmd;E:\QT\Tools\mingw730_64\bin;E:\QT\5.12.9\mingw73_64;E:\QT\5.12.9\mingw73_64\bin;C:\Program Files\CMake\bin;C:\Users\21764\AppData\Local\Microsoft\WindowsApps;C:\Users\21764\.dotnet\tools;C:\WINDOWS;C:\WINDOWS\system32;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0;C:\WINDOWS\System32\OpenSSH;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\dotnet\;C:\Program Files (x86)\Windows Kits\10\Windows Performance Toolkit\;F:\Matlab\R2024b\runtime\win64;F:\Matlab\R2024b\bin;F:\Cursor_code\apache-maven-3.9.14\bin;C:\Program Files\Eclipse Adoptium\jdk-25.0.1.8-hotspot\bin;C:\Users\21764\AppData\Local\Programs\garyttierney\me3\bin;C:\Users\21764\AppData\Local\Microsoft\WindowsApps;C:\Users\21764\.dotnet\tools;F:\Cursor\cursor\resources\app\bin;C:\Program Files\apache-maven-3.9.14\bin;."/>
+    <property name="java.library.path" value="C:\Program Files\Eclipse Adoptium\jdk-25.0.1.8-hotspot\bin;C:\WINDOWS\Sun\Java\bin;C:\WINDOWS\system32;C:\WINDOWS;f:\Cursor\cursor\_\resources\app\resources\helpers;C:\Program Files\Eclipse Adoptium\jdk-25.0.1.8-hotspot\bin;D:\Python\Scripts;D:\Python;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0;C:\Windows\System32\OpenSSH;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Program Files (x86)\Windows Kits\10\Windows Performance Toolkit;C:\Program Files\dotnet;D:\VSCode\Microsoft VS Code\bin;D:\VSCode\mingw64\bin;D:\Git\cmd;E:\QT\Tools\mingw730_64\bin;E:\QT\5.12.9\mingw73_64;E:\QT\5.12.9\mingw73_64\bin;C:\Program Files\CMake\bin;C:\Users\21764\AppData\Local\Microsoft\WindowsApps;C:\Users\21764\.dotnet\tools;C:\WINDOWS;C:\WINDOWS\system32;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0;C:\WINDOWS\System32\OpenSSH;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\dotnet\;C:\Program Files (x86)\Windows Kits\10\Windows Performance Toolkit\;F:\Matlab\R2024b\runtime\win64;F:\Matlab\R2024b\bin;F:\Cursor_code\apache-maven-3.9.14\bin;C:\Program Files\Eclipse Adoptium\jdk-25.0.1.8-hotspot\bin;C:\Users\21764\AppData\Local\Programs\garyttierney\me3\bin;C:\Users\21764\AppData\Local\Microsoft\WindowsApps;C:\Users\21764\.dotnet\tools;C:\Program Files\apache-maven-3.9.14\bin;F:\Cursor\cursor\resources\app\bin;."/>
     <property name="java.vm.info" value="mixed mode, sharing"/>
     <property name="stderr.encoding" value="GBK"/>
     <property name="java.vendor" value="Eclipse Adoptium"/>
@@ -61,8 +60,8 @@
     <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
     <property name="java.class.version" value="69.0"/>
   </properties>
-  <testcase name="testEmptyData" classname="compressor.algorithms.WebDictCompressorTest" time="0.001"/>
-  <testcase name="testCompareWithBrotli" classname="compressor.algorithms.WebDictCompressorTest" time="0.009">
+  <testcase name="testEmptyData" classname="compressor.algorithms.WebDictCompressorTest" time="0.0"/>
+  <testcase name="testCompareWithBrotli" classname="compressor.algorithms.WebDictCompressorTest" time="0.01">
     <system-out><![CDATA[
 
 ╔══════════════════════════════════════════════════════════════════╗
@@ -160,7 +159,7 @@ Brotli: 160 (29.20%)
 
 ]]></system-out>
   </testcase>
-  <testcase name="testCompressAndDecompressComplexHTML" classname="compressor.algorithms.WebDictCompressorTest" time="0.003">
+  <testcase name="testCompressAndDecompressComplexHTML" classname="compressor.algorithms.WebDictCompressorTest" time="0.005">
     <system-out><![CDATA[
 
 ╔══════════════════════════════════════════════════════════════════╗
@@ -256,7 +255,7 @@ Ratio: 35.08%
 
 ]]></system-out>
   </testcase>
-  <testcase name="testCompressAndDecompressCSS" classname="compressor.algorithms.WebDictCompressorTest" time="0.001">
+  <testcase name="testCompressAndDecompressCSS" classname="compressor.algorithms.WebDictCompressorTest" time="0.002">
     <system-out><![CDATA[
 
 ╔══════════════════════════════════════════════════════════════════╗
@@ -318,7 +317,7 @@ CSS - Original: 154 bytes, Compressed: 130 bytes
 [压缩数据] 长度=7 bytes
 ]]></system-out>
   </testcase>
-  <testcase name="testMultipleOccurrences" classname="compressor.algorithms.WebDictCompressorTest" time="0.002">
+  <testcase name="testMultipleOccurrences" classname="compressor.algorithms.WebDictCompressorTest" time="0.001">
     <system-out><![CDATA[
 
 ╔══════════════════════════════════════════════════════════════════╗
@@ -385,7 +384,7 @@ Multiple div tags - Original: 59, Compressed: 15
     <system-out><![CDATA[字典大小: 112
 ]]></system-out>
   </testcase>
-  <testcase name="testCompressAndDecompressJS" classname="compressor.algorithms.WebDictCompressorTest" time="0.002">
+  <testcase name="testCompressAndDecompressJS" classname="compressor.algorithms.WebDictCompressorTest" time="0.001">
     <system-out><![CDATA[
 
 ╔══════════════════════════════════════════════════════════════════╗
@@ -442,7 +441,7 @@ JS - Original: 183 bytes, Compressed: 156 bytes
 
 ]]></system-out>
   </testcase>
-  <testcase name="testCompressAndDecompressSimpleHTML" classname="compressor.algorithms.WebDictCompressorTest" time="0.001">
+  <testcase name="testCompressAndDecompressSimpleHTML" classname="compressor.algorithms.WebDictCompressorTest" time="0.0">
     <system-out><![CDATA[
 
 ╔══════════════════════════════════════════════════════════════════╗
@@ -500,7 +499,7 @@ JS - Original: 183 bytes, Compressed: 156 bytes
 
 ]]></system-out>
   </testcase>
-  <testcase name="testSingleSymbolData" classname="compressor.algorithms.WebDictCompressorTest" time="0.003">
+  <testcase name="testSingleSymbolData" classname="compressor.algorithms.WebDictCompressorTest" time="0.002">
     <system-out><![CDATA[
 
 ╔══════════════════════════════════════════════════════════════════╗

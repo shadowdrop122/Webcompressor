@@ -148,12 +148,8 @@
                                 <Spinner fx:id="treeDepthSpinner" min="2" max="10" initialValue="4" prefWidth="80"/>
                                 <Button text="刷新" onAction="#handleRefreshTree"/>
                             </HBox>
-                            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS">
-                                <TextArea fx:id="treeVisualization" editable="false" wrapText="false">
-                                    <font>
-                                        <Font name="Courier New" size="12"/>
-                                    </font>
-                                </TextArea>
+                            <ScrollPane fitToWidth="true" fitToHeight="true" VBox.vgrow="ALWAYS" hbarPolicy="AS_NEEDED" vbarPolicy="AS_NEEDED">
+                                <TextArea fx:id="treeVisualization" editable="false" wrapText="false" style="-fx-font-family: 'Courier New', monospace; -fx-font-size: 12px; -fx-background-color: #f5f5f5;"/>
                             </ScrollPane>
                         </VBox>
                     </Tab>

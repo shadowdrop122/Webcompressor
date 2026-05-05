@@ -5,3 +5,4 @@ compressor\algorithms\HuffmanTest.class
 compressor\model\IncrementalCompressorTest.class
 compressor\algorithms\HuffmanCompressorTest.class
 compressor\algorithms\BrotliCompressorTest.class
+compressor\utils\MagicNumberDetectorTest.class
