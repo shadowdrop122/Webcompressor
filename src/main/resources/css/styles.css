@@ -109,6 +109,77 @@
     -fx-background-color: transparent;
 }
 
+.resource-legend {
+    -fx-padding: 4 0 0 0;
+}
+
+.resource-legend-item {
+    -fx-alignment: center-left;
+}
+
+.resource-empty-label {
+    -fx-text-fill: #757575;
+}
+
+.tree-canvas {
+    -fx-background-color: #fafafa;
+}
+
+.tree-window {
+    -fx-background-color: #f5f5f5;
+}
+
+.tree-window-toolbar {
+    -fx-background-color: white;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 0 0 1 0;
+}
+
+.tree-node {
+    -fx-background-radius: 6;
+    -fx-border-radius: 6;
+    -fx-border-width: 1;
+    -fx-padding: 4;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.10), 4, 0, 0, 1);
+}
+
+.tree-node .label {
+    -fx-font-size: 11px;
+    -fx-text-fill: #263238;
+}
+
+.tree-node-internal {
+    -fx-background-color: #e3f2fd;
+    -fx-border-color: #90caf9;
+}
+
+.tree-node-leaf {
+    -fx-background-color: #e8f5e9;
+    -fx-border-color: #81c784;
+}
+
+.tree-node-collapsed {
+    -fx-background-color: #fff3e0;
+    -fx-border-color: #ffb74d;
+}
+
+.tree-edge {
+    -fx-stroke: #78909c;
+    -fx-stroke-width: 1.4;
+}
+
+.tree-edge-label {
+    -fx-background-color: #fafafa;
+    -fx-text-fill: #455a64;
+    -fx-font-weight: bold;
+    -fx-font-size: 11px;
+    -fx-padding: 1 4 1 4;
+}
+
+.tree-empty-label {
+    -fx-text-fill: #757575;
+}
+
 .spinner {
     -fx-background-color: white;
 }

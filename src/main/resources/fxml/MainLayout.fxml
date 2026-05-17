@@ -8,6 +8,7 @@
 <?import javafx.scene.chart.BarChart?>
 <?import javafx.scene.chart.CategoryAxis?>
 <?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.chart.PieChart?>
 
 <BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="compressor.gui.MainController"
@@ -55,6 +56,7 @@
                 <Button text="解压" onAction="#handleDecompress" styleClass="secondary-button"/>
                 <Button text="网页归档" onAction="#handleArchiveWZip" styleClass="secondary-button"/>
                 <Button text="解包归档" onAction="#handleExtractWZip" styleClass="secondary-button"/>
+                <Button text="显示树结构" onAction="#handleShowTreeStructure" styleClass="secondary-button"/>
             </ToolBar>
         </VBox>
     </top>
@@ -138,19 +140,15 @@
                             </HBox>
                         </VBox>
                     </Tab>
-                    <Tab text="树结构">
+                    <Tab text="资源占比">
                         <VBox spacing="10">
                             <padding>
                                 <Insets top="10" right="10" bottom="10" left="10"/>
                             </padding>
-                            <HBox spacing="10" alignment="CENTER_LEFT">
-                                <Label text="显示深度:"/>
-                                <Spinner fx:id="treeDepthSpinner" min="2" max="10" initialValue="4" prefWidth="80"/>
-                                <Button text="刷新" onAction="#handleRefreshTree"/>
-                            </HBox>
-                            <ScrollPane fitToWidth="true" fitToHeight="true" VBox.vgrow="ALWAYS" hbarPolicy="AS_NEEDED" vbarPolicy="AS_NEEDED">
-                                <TextArea fx:id="treeVisualization" editable="false" wrapText="false" style="-fx-font-family: 'Courier New', monospace; -fx-font-size: 12px; -fx-background-color: #f5f5f5;"/>
-                            </ScrollPane>
+                            <PieChart fx:id="resourceTypePieChart" prefHeight="250"
+                                      legendVisible="false" labelsVisible="true"/>
+                            <FlowPane fx:id="resourceTypeLegend" hgap="12" vgap="8"
+                                      prefWrapLength="260" styleClass="resource-legend"/>
                         </VBox>
                     </Tab>
                     <Tab text="传输分析">

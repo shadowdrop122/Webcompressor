@@ -14,12 +14,13 @@ flowchart TD
     EXT -->|HTML/CSS/JS| BRO[选择 Brotli]
     EXT -->|图片文件| POOL[选择 PoolingImage]
     EXT -->|字体/二进制| LZ[选择 LZ77]
-    EXT -->|其他| BRO2[选择 Brotli]
+    EXT -->|其他| MAGIC{基于魔数的<br/>二进制嗅探指针}
+    MAGIC -->|开头字节识别为图片| POOL
+    MAGIC -->|开头字节识别为通用文件| BRO[选择 Brotli]
     
     BRO --> READ[读取文件数据]
     POOL --> READ
     LZ --> READ
-    BRO2 --> READ
     
     READ --> COMPRESS
     

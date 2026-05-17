@@ -2,6 +2,7 @@ package compressor.gui;
 
 import compressor.algorithms.*;
 import compressor.core.ICompressor;
+import compressor.engine.ResourceDispatcher;
 import compressor.engine.WZipArchiver;
 import compressor.model.CompressionStats;
 import compressor.utils.FileUtils;
@@ -14,8 +15,14 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
 import javafx.scene.chart.BarChart;
-import javafx.scene.layout.VBox;
+import javafx.scene.chart.PieChart;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
@@ -23,12 +30,17 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.Window;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class MainController {
@@ -40,7 +52,6 @@ public class MainController {
     @FXML private Label imageQualityLabel;
     @FXML private TableView<FileEntry> fileTable;
     @FXML private TextArea consoleOutput;
-    @FXML private TextArea treeVisualization;
     @FXML private TextArea transferReport;
     @FXML private ProgressBar progressBar;
     @FXML private Label progressLabel;
@@ -52,13 +63,17 @@ public class MainController {
     @FXML private Label chartOriginalSize;
     @FXML private Label chartCompressedSize;
     @FXML private Label chartSavings;
-    @FXML private Spinner<Integer> treeDepthSpinner;
     @FXML private BarChart<String, Number> compressionChart;
+    @FXML private PieChart resourceTypePieChart;
+    @FXML private FlowPane resourceTypeLegend;
 
     private final ObservableList<FileEntry> fileEntries = FXCollections.observableArrayList();
     private final CompressionService compressionService = new CompressionService();
     private Path outputDirectory;
     private CompressionService.CompressionResult lastResult;
+    private Stage treeStage;
+    private ScrollPane treeWindowScrollPane;
+    private Spinner<Integer> treeWindowDepthSpinner;
 
     public static class FileEntry {
         private String fileName;
@@ -132,9 +147,7 @@ public class MainController {
         fileTable.getColumns().addAll(nameCol, sizeCol, typeCol);
         fileTable.setItems(fileEntries);
 
-        // 树结构可视化 TextArea 自动填充可用空间
-        VBox.setVgrow(treeVisualization, javafx.scene.layout.Priority.ALWAYS);
-
+        updateResourceTypeChart();
         setupCompressionService();
         startMemoryMonitor();
 
@@ -150,9 +163,7 @@ public class MainController {
             lastResult = compressionService.getValue();
             updateCompressionChart();
             updateTransferReport();
-            if (lastResult.getHuffmanTree() != null) {
-                treeVisualization.setText(lastResult.getHuffmanTree());
-            }
+            refreshTreeWindowIfOpen();
         });
 
         compressionService.setOnFailed(e -> {
@@ -249,6 +260,25 @@ public class MainController {
 
         selectedFilesCount.setText(count + " 个文件");
         selectedTotalSize.setText(FileUtils.formatFileSize(totalSize));
+        updateResourceTypeChart();
+    }
+
+    private void updateResourceTypeChart() {
+        if (resourceTypePieChart == null || resourceTypeLegend == null) {
+            return;
+        }
+
+        ResourceDispatcher dispatcher = ResourceDispatcher.getInstance();
+        Map<ResourceDispatcher.ResourceType, Long> typeSizes =
+            new EnumMap<>(ResourceDispatcher.ResourceType.class);
+
+        for (FileEntry entry : fileEntries) {
+            Path path = Paths.get(entry.getFilePath());
+            ResourceDispatcher.ResourceType type = dispatcher.classifyResourceType(path);
+            typeSizes.merge(type, entry.getFileSize(), Long::sum);
+        }
+
+        ChartBuilder.updateResourceTypePieChart(resourceTypePieChart, resourceTypeLegend, typeSizes);
     }
 
     @FXML
@@ -359,16 +389,101 @@ public class MainController {
     }
 
     @FXML
-    private void handleRefreshTree() {
-        if (lastResult != null) {
-            if (lastResult.getHuffmanTree() != null) {
-                treeVisualization.setText(lastResult.getHuffmanTree());
-            } else if (lastResult.getTrieTree() != null) {
-                treeVisualization.setText(lastResult.getTrieTree());
-            }
-        } else {
-            appendLog("请先执行一次压缩以查看树结构");
+    private void handleShowTreeStructure(ActionEvent event) {
+        if (treeStage != null && treeStage.isShowing()) {
+            refreshTreeWindow();
+            treeStage.toFront();
+            treeStage.requestFocus();
+            return;
         }
+
+        treeStage = new Stage();
+        treeStage.setTitle("Huffman 树结构");
+        Window owner = resolveOwnerWindow(event);
+        if (owner != null) {
+            treeStage.initOwner(owner);
+        }
+        treeStage.initModality(Modality.NONE);
+
+        BorderPane root = new BorderPane();
+        root.getStyleClass().add("tree-window");
+
+        HBox toolbar = new HBox(10);
+        toolbar.setAlignment(Pos.CENTER_LEFT);
+        toolbar.setPadding(new Insets(10));
+        toolbar.getStyleClass().add("tree-window-toolbar");
+
+        Label depthLabel = new Label("显示深度:");
+        treeWindowDepthSpinner = new Spinner<>(2, 16, 6);
+        treeWindowDepthSpinner.setEditable(true);
+        treeWindowDepthSpinner.setPrefWidth(90);
+        treeWindowDepthSpinner.valueProperty().addListener((obs, oldValue, newValue) -> refreshTreeWindow());
+
+        Button refreshButton = new Button("刷新");
+        refreshButton.setOnAction(e -> refreshTreeWindow());
+        toolbar.getChildren().addAll(depthLabel, treeWindowDepthSpinner, refreshButton);
+
+        treeWindowScrollPane = new ScrollPane();
+        treeWindowScrollPane.setFitToWidth(false);
+        treeWindowScrollPane.setFitToHeight(false);
+        treeWindowScrollPane.setPannable(true);
+        treeWindowScrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        treeWindowScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+
+        root.setTop(toolbar);
+        root.setCenter(treeWindowScrollPane);
+
+        Scene scene = new Scene(root, 1000, 720);
+        var stylesheet = getClass().getResource("/css/styles.css");
+        if (stylesheet != null) {
+            scene.getStylesheets().add(stylesheet.toExternalForm());
+        }
+
+        treeStage.setScene(scene);
+        treeStage.setMinWidth(760);
+        treeStage.setMinHeight(520);
+        treeStage.setOnHidden(e -> {
+            treeStage = null;
+            treeWindowScrollPane = null;
+            treeWindowDepthSpinner = null;
+        });
+
+        refreshTreeWindow();
+        treeStage.show();
+    }
+
+    private Window resolveOwnerWindow(ActionEvent event) {
+        if (event != null && event.getSource() instanceof Control control
+            && control.getScene() != null && control.getScene().getWindow() != null) {
+            return control.getScene().getWindow();
+        }
+        return App.getPrimaryStage();
+    }
+
+    private void refreshTreeWindowIfOpen() {
+        if (treeStage != null && treeStage.isShowing()) {
+            refreshTreeWindow();
+        }
+    }
+
+    private void refreshTreeWindow() {
+        if (treeWindowScrollPane == null) {
+            return;
+        }
+
+        int depth = treeWindowDepthSpinner == null ? 6 : treeWindowDepthSpinner.getValue();
+        treeWindowScrollPane.setContent(createTreeVisualizationPane(depth));
+    }
+
+    private Pane createTreeVisualizationPane(int depth) {
+        if (lastResult != null && lastResult.getCodeTable() != null && !lastResult.getCodeTable().isEmpty()) {
+            return TreeVisualizer.createHuffmanTreePane(lastResult.getCodeTable(), depth);
+        }
+
+        if (lastResult == null) {
+            appendLog("请先执行一次 Huffman 压缩以查看树结构");
+        }
+        return TreeVisualizer.createHuffmanTreePane(java.util.Collections.emptyMap(), depth);
     }
 
    private void updateCompressionChart() {

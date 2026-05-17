@@ -1,13 +1,22 @@
 package compressor.gui;
 
+import compressor.engine.ResourceDispatcher;
+import compressor.utils.FileUtils;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Side;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.PieChart;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.Label;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import java.util.List;
+import java.util.Map;
 
 public class ChartBuilder {
 
@@ -138,6 +147,81 @@ public class ChartBuilder {
 
         data.add(series);
         return data;
+    }
+
+    public static void updateResourceTypePieChart(PieChart chart,
+                                                  FlowPane legend,
+                                                  Map<ResourceDispatcher.ResourceType, Long> typeSizes) {
+        chart.getData().clear();
+        legend.getChildren().clear();
+        chart.setLegendVisible(false);
+        chart.setLabelsVisible(true);
+
+        long totalSize = typeSizes.values().stream().mapToLong(Long::longValue).sum();
+        if (totalSize <= 0) {
+            chart.setTitle("暂无文件");
+            Label emptyLabel = new Label("暂无文件");
+            emptyLabel.getStyleClass().add("resource-empty-label");
+            legend.getChildren().add(emptyLabel);
+            return;
+        }
+
+        chart.setTitle("资源类型占比");
+        for (ResourceDispatcher.ResourceType type : ResourceDispatcher.ResourceType.values()) {
+            long size = typeSizes.getOrDefault(type, 0L);
+            if (size <= 0) {
+                continue;
+            }
+
+            double percent = (double) size * 100 / totalSize;
+            PieChart.Data data = new PieChart.Data(
+                String.format("%s %.1f%%", type.getDisplayName(), percent),
+                size
+            );
+            chart.getData().add(data);
+            applyPieSliceColor(data, getResourceTypeColor(type));
+            legend.getChildren().add(createResourceLegendItem(type, size, percent));
+        }
+    }
+
+    private static void applyPieSliceColor(PieChart.Data data, String color) {
+        data.nodeProperty().addListener((observable, oldNode, newNode) -> {
+            if (newNode != null) {
+                newNode.setStyle("-fx-pie-color: " + color + ";");
+            }
+        });
+        if (data.getNode() != null) {
+            data.getNode().setStyle("-fx-pie-color: " + color + ";");
+        }
+    }
+
+    private static HBox createResourceLegendItem(ResourceDispatcher.ResourceType type,
+                                                long size,
+                                                double percent) {
+        Rectangle swatch = new Rectangle(12, 12);
+        swatch.setArcWidth(2);
+        swatch.setArcHeight(2);
+        swatch.setFill(Color.web(getResourceTypeColor(type)));
+
+        Label label = new Label(String.format(
+            "%s：%s，占 %.1f%%",
+            type.getDisplayName(),
+            FileUtils.formatFileSize(size),
+            percent
+        ));
+
+        HBox item = new HBox(6, swatch, label);
+        item.getStyleClass().add("resource-legend-item");
+        return item;
+    }
+
+    private static String getResourceTypeColor(ResourceDispatcher.ResourceType type) {
+        return switch (type) {
+            case WEB_TEXT -> "#1976d2";
+            case IMAGE -> "#2e7d32";
+            case BINARY_FONT -> "#f57c00";
+            case OTHER -> "#757575";
+        };
     }
 
     private static String shortenFileName(String fileName) {

@@ -37,6 +37,26 @@ public class ResourceDispatcher {
     // 文件类型映射表（后缀 -> 策略ID）
     private final Map<String, Byte> extensionToStrategy;
 
+    /**
+     * UI资源类型分类
+     */
+    public enum ResourceType {
+        WEB_TEXT("网页/文本资源"),
+        IMAGE("图片资源"),
+        BINARY_FONT("字体/二进制资源"),
+        OTHER("其他资源");
+
+        private final String displayName;
+
+        ResourceType(String displayName) {
+            this.displayName = displayName;
+        }
+
+        public String getDisplayName() {
+            return displayName;
+        }
+    }
+
     public ResourceDispatcher() {
         this.compressorCache = new HashMap<>();
         this.extensionToStrategy = new HashMap<>();
@@ -185,6 +205,56 @@ public class ResourceDispatcher {
     public ICompressor getCompressorByMimeType(String mimeType) throws IOException {
         byte strategyId = getStrategyByMimeType(mimeType);
         return getCompressor(strategyId);
+    }
+
+    /**
+     * 根据智能调度逻辑识别资源类型，用于UI资源占比分析。
+     * 已知扩展名优先按调度策略归类；未知扩展名会读取文件头魔数识别图片。
+     */
+    public ResourceType classifyResourceType(Path filePath) {
+        if (filePath == null) {
+            return ResourceType.OTHER;
+        }
+
+        String filename = filePath.getFileName() == null ? "" : filePath.getFileName().toString();
+        Byte mappedStrategy = findMappedStrategy(filename);
+        if (mappedStrategy != null) {
+            return resourceTypeFromStrategy(mappedStrategy);
+        }
+
+        try {
+            MagicNumberDetector.ImageType imageType = MagicNumberDetector.detectImageType(filePath);
+            if (imageType != MagicNumberDetector.ImageType.UNKNOWN) {
+                return ResourceType.IMAGE;
+            }
+        } catch (IOException e) {
+            return ResourceType.OTHER;
+        }
+
+        return ResourceType.OTHER;
+    }
+
+    private Byte findMappedStrategy(String filename) {
+        if (filename == null) {
+            return null;
+        }
+
+        String lower = filename.toLowerCase();
+        for (Map.Entry<String, Byte> entry : extensionToStrategy.entrySet()) {
+            if (lower.endsWith(entry.getKey()) && !".unknown".equals(entry.getKey())) {
+                return entry.getValue();
+            }
+        }
+        return null;
+    }
+
+    private ResourceType resourceTypeFromStrategy(byte strategyId) {
+        return switch (strategyId) {
+            case STRATEGY_POOLING_IMAGE, STRATEGY_LZW_IMAGE -> ResourceType.IMAGE;
+            case STRATEGY_LZ77 -> ResourceType.BINARY_FONT;
+            case STRATEGY_BROTLI, STRATEGY_WEBDICT -> ResourceType.WEB_TEXT;
+            default -> ResourceType.OTHER;
+        };
     }
 
     /**
